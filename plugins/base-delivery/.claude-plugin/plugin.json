@@ -1,0 +1,6 @@
+{
+  "name": "base-delivery",
+  "description": "Triển khai và báo cáo cho khách hàng Base: báo cáo triển khai, báo cáo ngày Apps Script, lưu đồ quy trình (PDF/HTML tương tác), link AMECC.",
+  "version": "1.0.0",
+  "author": { "name": "MemeHael" }
+}

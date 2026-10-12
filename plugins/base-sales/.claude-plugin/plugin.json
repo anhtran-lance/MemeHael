@@ -1,0 +1,6 @@
+{
+  "name": "base-sales",
+  "description": "Phân tích và phản biện hành trình deal Enterprise B2B (MEDDPICC, Battle Card, POR/SITREP).",
+  "version": "1.0.0",
+  "author": { "name": "MemeHael" }
+}

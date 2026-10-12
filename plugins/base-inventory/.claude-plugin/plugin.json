@@ -1,0 +1,6 @@
+{
+  "name": "base-inventory",
+  "description": "Thiết lập tồn kho theo lô trên Base.vn: phương án 1-1 (1 sản phẩm/đơn) và 1-n (nhiều dòng/đơn).",
+  "version": "1.0.0",
+  "author": { "name": "MemeHael" }
+}

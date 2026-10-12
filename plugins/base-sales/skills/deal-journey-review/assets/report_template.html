@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TEN_KHACH_HANG}} — Review hành trình deal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,800&family=Be+Vietnam+Pro:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   THEME — bảng màu HUDLAND Techmap
+   ĐỔI MÀU THƯƠNG HIỆU: sửa --brand ở cả 2 khối :root bên dưới.
+   ============================================================ */
+:root{
+  --brand:#2563EB;              /* ← xanh chủ đạo */
+  --brand-deep:#1E3A6E;         /* navy tiêu đề */
+  --brand-soft:#4F8FF7;
+  --cyan:#5BC8F0;               /* accent dòng chảy */
+  --gold:#E0A21A;               /* goal / dữ liệu chưa chắc */
+
+  --brand-wash:rgba(37,99,235,.08);
+  --brand-line:rgba(37,99,235,.22);
+
+  --bg:#FFFFFF;
+  --bg-grad:linear-gradient(178deg,#FFFFFF 0%,#F4F7FE 34%,#E9EFFC 100%);
+  --glow:radial-gradient(900px 460px at 88% -6%,rgba(91,200,240,.16),transparent 62%);
+  --surface:rgba(255,255,255,.74);
+  --surface-solid:#F4F7FE;
+  --surface-2:#E6EDFB;
+
+  --ink:#16233D; --ink-2:#55617A; --ink-3:#8A99B8;
+  --rule:rgba(30,58,110,.13); --rule-2:rgba(30,58,110,.26);
+
+  --danger:#D23F3F; --danger-wash:rgba(210,63,63,.09);
+  --warn:#B8830F;   --warn-wash:rgba(224,162,26,.14);
+  --ok:#12A07A;     --ok-wash:rgba(18,160,122,.10);
+
+  --shadow:0 1px 2px rgba(30,58,110,.05),0 10px 30px rgba(30,58,110,.07);
+  --shadow-lg:0 2px 4px rgba(30,58,110,.06),0 18px 50px rgba(30,58,110,.10);
+  --fade:#F7F9FE;
+  --r:10px;
+}
+[data-theme="dark"]{
+  --brand:#6BA0FF;
+  --brand-deep:#A8C6FF;
+  --brand-soft:#8FB8FF;
+  --cyan:#6FD8F5;
+  --gold:#FFC85C;
+
+  --brand-wash:rgba(107,160,255,.13);
+  --brand-line:rgba(107,160,255,.30);
+
+  --bg:#05070C;
+  --bg-grad:linear-gradient(178deg,#05070C 0%,#080D18 45%,#0A1222 100%);
+  --glow:radial-gradient(900px 460px at 88% -6%,rgba(111,216,245,.10),transparent 62%);
+  --surface:rgba(20,30,50,.62);
+  --surface-solid:#101827;
+  --surface-2:#16202F;
+
+  --ink:#E9EFFA; --ink-2:#A3B0C8; --ink-3:#6E7D9B;
+  --rule:rgba(168,198,255,.15); --rule-2:rgba(168,198,255,.30);
+
+  --danger:#FF7A6B; --danger-wash:rgba(255,122,107,.13);
+  --warn:#FFC85C;   --warn-wash:rgba(255,200,92,.13);
+  --ok:#3FD8A8;     --ok-wash:rgba(63,216,168,.12);
+
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.45);
+  --shadow-lg:0 2px 6px rgba(0,0,0,.55),0 20px 56px rgba(0,0,0,.5);
+  --fade:#0A1120;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;color:var(--ink);min-height:100vh;
+  background:var(--bg-grad) fixed;
+  font-family:"Be Vietnam Pro",system-ui,sans-serif;font-weight:400;
+  font-size:16px;line-height:1.65;transition:background .35s,color .35s;
+}
+body::before{content:"";position:fixed;inset:0;background:var(--glow);pointer-events:none;z-index:0}
+.wrap{max-width:1160px;margin:0 auto;padding:0 30px;position:relative;z-index:1}
+h1,h2,h3,h4,.dsp{font-family:"Archivo",sans-serif}
+
+/* ---------------- HEADER ---------------- */
+header{padding:52px 0 0}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;letter-spacing:.32em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-weight:800;font-size:clamp(34px,5.6vw,62px);line-height:1.0;letter-spacing:-.035em;margin:22px 0 0;max-width:17ch;color:var(--brand-deep)}
+[data-theme="dark"] h1{color:var(--ink)}
+h1 em{font-style:normal;color:var(--brand)}
+.subthesis{
+  font-family:"Archivo",sans-serif;font-weight:700;font-size:clamp(16px,2vw,20.5px);
+  line-height:1.4;margin:24px 0 0;max-width:58ch;color:var(--brand-deep);
+  background:var(--surface);border:1px solid var(--brand-line);border-left:5px solid var(--brand);
+  padding:16px 20px;border-radius:var(--r);backdrop-filter:blur(10px);box-shadow:var(--shadow);
+}
+.standfirst{margin:24px 0 0;max-width:68ch;font-size:17.5px;color:var(--ink-2);font-weight:300}
+.metastrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin:36px 0 0}
+.metastrip div{padding:16px 18px 18px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+.metastrip .k{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3)}
+.metastrip .v{font-family:"Archivo",sans-serif;font-weight:800;font-size:27px;letter-spacing:-.03em;margin-top:5px;color:var(--brand-deep)}
+[data-theme="dark"] .metastrip .v{color:var(--ink)}
+.metastrip .v.bad{color:var(--danger)}
+.metastrip .v.good{color:var(--ok)}
+.tgl{
+  border:1px solid var(--rule-2);background:var(--surface);color:var(--ink-2);
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  padding:10px 18px;border-radius:100px;cursor:pointer;font-weight:500;
+  backdrop-filter:blur(10px);transition:all .2s;flex:0 0 auto;box-shadow:var(--shadow);
+}
+.tgl:hover{color:var(--brand);border-color:var(--brand-line)}
+.tgl:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+
+/* ---------------- TRỤC NHỊP (2 lớp) ---------------- */
+.axis-block{margin:44px 0 0;padding:30px 28px 28px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;backdrop-filter:blur(10px);box-shadow:var(--shadow-lg)}
+.axis-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+.axis-title{font-family:"Archivo",sans-serif;font-weight:800;font-size:18px;letter-spacing:-.02em;color:var(--brand-deep)}
+[data-theme="dark"] .axis-title{color:var(--ink)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase}
+.legend span{display:flex;align-items:center;gap:7px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.d-pos{background:var(--ok)}.d-neu{background:var(--ink-3)}.d-neg{background:var(--danger)}
+
+/* --- LỚP 1: minimap tỉ lệ thật, chỉ có điểm, không chữ --- */
+.mm-wrap{margin:0 0 8px}
+.mm-cap{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px}
+.minimap{position:relative;height:34px;margin:0 6px}
+.mm-rail{position:absolute;left:0;right:0;top:15px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--brand-line),var(--cyan),var(--brand-line));opacity:.85}
+.mm-silence{position:absolute;top:8px;height:17px;border-radius:5px;background:repeating-linear-gradient(-45deg,var(--danger-wash) 0 6px,transparent 6px 12px);border:1px dashed var(--danger)}
+.mm-dot{
+  position:absolute;top:9px;width:15px;height:15px;margin-left:-7.5px;border-radius:50%;
+  border:2.5px solid var(--surface-solid);box-shadow:0 0 0 1px var(--rule);
+  padding:0;appearance:none;cursor:pointer;transition:transform .16s,box-shadow .16s;
+}
+.mm-dot:hover{transform:scale(1.38);z-index:3}
+.mm-dot:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+.mm-dot.is-active{transform:scale(1.4);box-shadow:0 0 0 1px var(--rule),0 0 0 5px var(--brand-wash);z-index:4}
+.mm-hint{font-size:12px;color:var(--ink-3);margin:12px 0 0;display:flex;align-items:center;gap:7px}
+.mm-hint::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--brand);flex:0 0 auto;box-shadow:0 0 0 4px var(--brand-wash)}
+.mm-dot.pos{background:var(--ok)}.mm-dot.neu{background:var(--ink-3)}.mm-dot.neg{background:var(--danger)}
+.mm-scale{display:flex;justify-content:space-between;margin:10px 4px 0;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;color:var(--ink-3)}
+.mm-note{margin:14px 0 0;font-size:13.5px;color:var(--ink-2);max-width:82ch}
+.mm-note b{color:var(--danger);font-weight:600}
+
+/* --- LỚP 2: danh sách dọc đọc được --- */
+.tline-box{position:relative;margin:22px 0 0;border-top:1px solid var(--rule)}
+.tline-box::before,.tline-box::after{content:"";position:absolute;left:0;right:12px;height:26px;pointer-events:none;z-index:2}
+.tline-box::before{top:0;background:linear-gradient(var(--fade),transparent)}
+.tline-box::after{bottom:0;background:linear-gradient(transparent,var(--fade))}
+.tline-scroll{max-height:330px;overflow-y:auto;overscroll-behavior:contain;padding:8px 14px 8px 0;scroll-behavior:smooth}
+.tline-scroll::-webkit-scrollbar{width:8px}
+.tline-scroll::-webkit-scrollbar-track{background:var(--surface-2);border-radius:100px}
+.tline-scroll::-webkit-scrollbar-thumb{background:var(--brand-line);border-radius:100px}
+.tline-scroll::-webkit-scrollbar-thumb:hover{background:var(--brand)}
+.tline-scroll{scrollbar-width:thin;scrollbar-color:var(--brand-line) var(--surface-2)}
+.tline{list-style:none;padding:0;margin:0}
+.tl-row{display:grid;grid-template-columns:52px 26px 1fr auto;align-items:center;gap:14px;padding:11px 10px;
+  border-radius:10px;scroll-margin-top:14px;transition:background .3s,box-shadow .3s}
+.tl-row.is-target{background:var(--brand-wash);box-shadow:inset 0 0 0 1px var(--brand-line)}
+.tl-num{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;color:var(--ink-3);text-align:right}
+.tl-node{position:relative;height:100%;display:grid;place-items:center}
+.tl-mk{width:13px;height:13px;border-radius:50%;border:2.5px solid var(--surface-solid);box-shadow:0 0 0 1px var(--rule);z-index:1}
+.tl-mk.pos{background:var(--ok)}.tl-mk.neu{background:var(--ink-3)}.tl-mk.neg{background:var(--danger)}
+.tl-body{min-width:0}
+.tl-date{font-family:"Archivo",sans-serif;font-weight:800;font-size:15.5px;letter-spacing:-.025em;color:var(--brand-deep);line-height:1.2}
+[data-theme="dark"] .tl-date{color:var(--ink)}
+.tl-name{font-size:13.5px;color:var(--ink-2);line-height:1.35;margin-top:2px}
+.tl-meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.tl-eb{font-family:"IBM Plex Mono",monospace;font-size:8.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:4px 9px;border-radius:100px;background:var(--brand-wash);color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand-line)}
+.tl-eb.part{background:var(--warn-wash);color:var(--warn);box-shadow:inset 0 0 0 1px rgba(224,162,26,.4)}
+
+/* khoảng cách giữa 2 buổi — chiều cao tỉ lệ số ngày */
+.tl-gap{display:grid;grid-template-columns:52px 26px 1fr;align-items:center;gap:14px;padding:0 10px}
+.tl-gapline{grid-column:2;justify-self:center;width:2px;border-radius:2px;background:var(--brand-line)}
+.tl-gap.long .tl-gapline{background:repeating-linear-gradient(180deg,var(--gold) 0 5px,transparent 5px 10px);width:3px}
+.tl-gap.dead .tl-gapline{background:repeating-linear-gradient(180deg,var(--danger) 0 5px,transparent 5px 10px);width:3px}
+.tl-gaptxt{grid-column:3;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;color:var(--ink-3)}
+.tl-gap.long .tl-gaptxt{color:var(--gold);font-weight:600}
+.tl-gap.dead .tl-gaptxt{color:var(--danger);font-weight:600}
+.tl-gaptxt em{font-style:normal;opacity:.75;letter-spacing:0;font-family:"Be Vietnam Pro",sans-serif;font-size:12px}
+
+/* dải im lặng hiện tại ở cuối */
+.tl-now{display:grid;grid-template-columns:52px 26px 1fr;gap:14px;align-items:center;margin-top:2px;padding:0 10px 4px}
+.tl-now .tl-gapline{grid-column:2;justify-self:center;width:3px;border-radius:2px;background:repeating-linear-gradient(180deg,var(--danger) 0 5px,transparent 5px 10px)}
+.tl-nowbox{grid-column:3;background:var(--danger-wash);border:1px dashed var(--danger);border-radius:var(--r);padding:11px 16px;font-size:13.5px;color:var(--ink)}
+.tl-nowbox b{color:var(--danger);font-family:"Archivo",sans-serif;font-weight:800;letter-spacing:-.02em}
+
+/* ---------------- TABS ---------------- */
+nav.tabs{position:sticky;top:0;z-index:30;margin-top:40px;background:var(--bg);border-bottom:1px solid var(--rule);overflow-x:auto;backdrop-filter:blur(16px)}
+nav.tabs .wrap{display:flex;padding:11px 30px;gap:6px}
+nav.tabs button{
+  appearance:none;background:transparent;border:0;cursor:pointer;white-space:nowrap;
+  display:flex;align-items:center;gap:9px;padding:9px 16px;border-radius:100px;
+  color:var(--ink-3);font-family:"Be Vietnam Pro",sans-serif;font-size:14px;font-weight:500;transition:all .18s;
+}
+nav.tabs button .num{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:500;letter-spacing:.06em;opacity:.7}
+nav.tabs button:hover{color:var(--ink);background:var(--brand-wash)}
+nav.tabs button[aria-selected="true"]{color:var(--brand);background:var(--brand-wash);font-weight:600;box-shadow:inset 0 0 0 1px var(--brand-line)}
+nav.tabs button[aria-selected="true"] .num{opacity:1}
+
+/* ---------------- SECTION HERO ---------------- */
+section.panel{padding:0 0 88px;display:none;animation:fade .3s ease}
+section.panel.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.sechero{display:flex;align-items:center;gap:18px;margin:0 0 32px;padding:34px 0 24px}
+.sechero .secnum{
+  font-family:"Archivo",sans-serif;font-weight:800;font-size:22px;letter-spacing:-.03em;
+  background:linear-gradient(150deg,var(--brand),var(--cyan));color:#fff;
+  width:56px;height:56px;border-radius:14px;display:grid;place-items:center;flex:0 0 auto;
+  box-shadow:0 8px 22px rgba(37,99,235,.28);
+}
+.sechero .secname{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:var(--brand)}
+.sechero .secsub{display:block;font-family:"Be Vietnam Pro",sans-serif;font-size:13.5px;letter-spacing:0;text-transform:none;color:var(--ink-3);font-weight:400;margin-top:6px}
+
+h2{font-weight:800;font-size:clamp(24px,3.3vw,34px);letter-spacing:-.032em;line-height:1.14;margin:0 0 12px;max-width:26ch;color:var(--brand-deep)}
+[data-theme="dark"] h2{color:var(--ink)}
+.lede{font-size:17px;color:var(--ink-2);font-weight:300;max-width:68ch;margin:0 0 34px}
+h3{font-weight:800;font-size:19px;letter-spacing:-.022em;margin:44px 0 12px;color:var(--brand-deep)}
+[data-theme="dark"] h3{color:var(--ink)}
+h3::before{content:"";display:inline-block;width:20px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--brand),var(--cyan));vertical-align:middle;margin-right:12px}
+p{max-width:74ch;margin:0 0 14px}
+strong{font-weight:600;color:var(--ink)}
+
+/* ---------------- HIGHLIGHT ---------------- */
+mark,.hl{background:var(--brand-wash);color:var(--brand);font-weight:600;padding:2px 6px;border-radius:4px;box-shadow:inset 0 -2px 0 var(--brand-line)}
+.hl-bad{background:var(--danger-wash);color:var(--danger);font-weight:600;padding:2px 6px;border-radius:4px;box-shadow:inset 0 -2px 0 rgba(210,63,63,.4)}
+.hl-ok{background:var(--ok-wash);color:var(--ok);font-weight:600;padding:2px 6px;border-radius:4px;box-shadow:inset 0 -2px 0 rgba(18,160,122,.4)}
+.amb{
+  color:var(--ink);font-weight:600;background:var(--warn-wash);padding:2px 5px;border-radius:4px;
+  text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--gold);
+  text-decoration-thickness:2px;text-underline-offset:4px;
+}
+.amb::after{content:"?";font-family:"IBM Plex Mono",monospace;font-size:9.5px;font-weight:700;color:var(--gold);vertical-align:super;margin-left:2px}
+.amb-key{display:flex;gap:11px;align-items:center;margin:24px 0 0;padding:13px 18px;border:1px solid var(--gold);border-radius:var(--r);background:var(--warn-wash);font-size:13px;color:var(--ink-2);max-width:76ch}
+.amb-key b{color:var(--gold)}
+
+/* ---------------- CARDS / TABLES ---------------- */
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(315px,1fr));gap:18px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:24px 26px 26px;box-shadow:var(--shadow);backdrop-filter:blur(10px);transition:box-shadow .25s,transform .25s}
+.card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.card .tag{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:10px}
+.card h4{font-weight:800;font-size:17px;letter-spacing:-.022em;margin:0 0 6px;color:var(--brand-deep)}
+[data-theme="dark"] .card h4{color:var(--ink)}
+.card p{font-size:14.5px;margin-bottom:10px;color:var(--ink-2)}
+.card p:last-child{margin-bottom:0}
+
+table{width:100%;border-collapse:separate;border-spacing:0;margin:10px 0;font-size:14.5px;background:var(--surface);border:1px solid var(--rule);border-radius:12px;overflow:hidden;backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{background:var(--surface-2);font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--brand-wash)}
+td.num{font-family:"Archivo",sans-serif;font-weight:800;font-size:17px;letter-spacing:-.025em;white-space:nowrap;color:var(--brand-deep)}
+[data-theme="dark"] td.num{color:var(--ink)}
+td.num.bad{color:var(--danger)}
+td.num.ok{color:var(--ok)}
+td.k{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:500;white-space:nowrap;color:var(--ink)}
+
+.pill{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:5px 11px;border-radius:100px;white-space:nowrap}
+.pill.no{background:var(--danger-wash);color:var(--danger);box-shadow:inset 0 0 0 1px rgba(210,63,63,.35)}
+.pill.part{background:var(--warn-wash);color:var(--warn);box-shadow:inset 0 0 0 1px rgba(224,162,26,.4)}
+.pill.yes{background:var(--ok-wash);color:var(--ok);box-shadow:inset 0 0 0 1px rgba(18,160,122,.35)}
+.pill.neu{background:var(--surface-2);color:var(--ink-3);box-shadow:inset 0 0 0 1px var(--rule)}
+
+/* ---------------- PULL / QUOTE / CORRECTION ---------------- */
+.pull{
+  background:linear-gradient(135deg,var(--brand),var(--brand-soft) 60%,var(--cyan));
+  color:#fff;border-radius:14px;padding:26px 30px;margin:32px 0;
+  font-family:"Archivo",sans-serif;font-weight:700;font-size:21px;line-height:1.38;
+  letter-spacing:-.024em;max-width:58ch;box-shadow:0 14px 40px rgba(37,99,235,.24);
+}
+.pull.good{background:linear-gradient(135deg,var(--ok),#4FD3A8);box-shadow:0 14px 40px rgba(18,160,122,.24)}
+.quote{background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--cyan);padding:18px 24px;margin:22px 0;border-radius:var(--r);max-width:80ch;backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+.quote .src{display:block;font-family:"IBM Plex Mono",monospace;font-size:9.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:9px}
+.quote p{font-size:15px;margin:0;color:var(--ink);font-style:italic}
+.correction{background:var(--danger-wash);border:1px solid var(--danger);border-left:4px solid var(--danger);padding:22px 26px;margin:28px 0;border-radius:var(--r);max-width:80ch;box-shadow:var(--shadow)}
+.correction .src{display:block;font-family:"IBM Plex Mono",monospace;font-size:9.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--danger);margin-bottom:11px}
+.correction p{font-size:15px;margin:0 0 11px;color:var(--ink)}
+.correction p:last-child{margin:0}
+
+/* ---------------- B-PHASE GATES (bậc thang) ---------------- */
+.gates{margin:10px 0 6px}
+.gscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:6px 2px 4px}
+.grow{display:flex;min-width:790px;gap:12px;align-items:flex-end}
+.gph{flex:1;border:1px solid var(--rule);border-radius:14px;padding:18px 20px 20px;background:var(--surface);backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+.gph:nth-child(1){margin-bottom:36px}
+.gph:nth-child(2){margin-bottom:24px}
+.gph:nth-child(3){margin-bottom:12px}
+.gph.done{background:linear-gradient(160deg,var(--ok-wash),var(--surface));border-color:rgba(18,160,122,.4)}
+.gph.here{background:linear-gradient(160deg,rgba(37,99,235,.16),var(--surface));border-color:var(--brand);box-shadow:0 10px 32px rgba(37,99,235,.18)}
+.gph.burning{background:linear-gradient(160deg,var(--danger-wash),var(--surface));border-color:rgba(210,63,63,.45);border-style:dashed}
+.gph .code{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:500;letter-spacing:.28em;color:var(--ink-3)}
+.gph .nm{font-family:"Archivo",sans-serif;font-weight:800;font-size:16px;letter-spacing:-.025em;margin:5px 0 10px;color:var(--brand-deep)}
+[data-theme="dark"] .gph .nm{color:var(--ink)}
+.gph ul{margin:0;padding-left:16px}
+.gph li{font-size:12.5px;color:var(--ink-2);margin-bottom:5px;line-height:1.45}
+.gph .st{margin-top:13px;display:inline-block}
+.gatebar{display:flex;min-width:790px;margin-top:12px;gap:12px}
+.gatebar div{flex:1;text-align:center;font-family:"IBM Plex Mono",monospace;font-size:9.5px;font-weight:500;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase}
+.gatebar div.broken{color:var(--danger)}
+.leap{min-width:790px;margin-top:16px;position:relative;height:44px}
+.leap .bar{position:absolute;left:50%;right:0;top:12px;height:20px;border:1px dashed var(--danger);border-radius:100px;background:var(--danger-wash)}
+.leap .txt{position:absolute;left:51.5%;top:14px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.06em;color:var(--danger);font-weight:600}
+
+/* ---------------- LỖ HỔNG ---------------- */
+.gaps{list-style:none;padding:0;margin:0;counter-reset:g;display:grid;gap:14px}
+.gaps li{counter-increment:g;display:grid;grid-template-columns:52px 1fr;gap:20px;padding:24px 26px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+.gaps li::before{
+  content:"0" counter(g);font-family:"Archivo",sans-serif;font-weight:800;font-size:17px;
+  color:#fff;background:linear-gradient(150deg,var(--brand),var(--cyan));border-radius:11px;
+  height:44px;display:grid;place-items:center;letter-spacing:-.03em;box-shadow:0 6px 16px rgba(37,99,235,.24);
+}
+.gaps h4{font-weight:800;font-size:18px;letter-spacing:-.026em;margin:0 0 9px;line-height:1.3;color:var(--brand-deep)}
+[data-theme="dark"] .gaps h4{color:var(--ink)}
+.gaps p{font-size:14.8px;color:var(--ink-2);margin-bottom:9px}
+.gaps p:last-child{margin-bottom:0}
+.sev{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:100px;margin-left:9px;vertical-align:3px}
+.sev.hi{background:var(--danger-wash);color:var(--danger);box-shadow:inset 0 0 0 1px rgba(210,63,63,.35)}
+.sev.md{background:var(--warn-wash);color:var(--warn);box-shadow:inset 0 0 0 1px rgba(224,162,26,.4)}
+.sev.new{background:var(--brand-wash);color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand-line)}
+
+/* ---------------- KẾ HOẠCH ---------------- */
+.week{display:grid;grid-template-columns:150px 1fr;gap:24px;padding:26px;margin-bottom:14px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+.week .wk{font-family:"Archivo",sans-serif;font-size:15px;font-weight:800;letter-spacing:-.02em;color:#fff;background:linear-gradient(150deg,var(--brand),var(--cyan));border-radius:11px;padding:13px 16px;height:fit-content;box-shadow:0 8px 20px rgba(37,99,235,.22)}
+.week .wk small{display:block;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;margin-top:6px;opacity:.9;font-weight:400}
+.week h4{font-weight:800;font-size:19.5px;letter-spacing:-.028em;margin:0 0 13px;color:var(--brand-deep)}
+[data-theme="dark"] .week h4{color:var(--ink)}
+.todo{list-style:none;padding:0;margin:0}
+.todo li{position:relative;padding:0 0 0 24px;margin-bottom:12px;font-size:15px;color:var(--ink-2);max-width:72ch}
+.todo li::before{content:"";position:absolute;left:0;top:9px;width:10px;height:2px;border-radius:2px;background:var(--cyan)}
+.deliv{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:var(--brand-wash);color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand-line);padding:4px 10px;border-radius:100px;margin-right:9px;vertical-align:1.5px}
+.stop{border:1px solid var(--danger);border-left:4px solid var(--danger);border-radius:14px;padding:24px 28px;margin:32px 0 0;background:var(--danger-wash);box-shadow:var(--shadow)}
+.stop .tag{font-family:"IBM Plex Mono",monospace;font-size:9.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--danger);display:block;margin-bottom:11px}
+.stop p{font-size:15.5px;margin:0;color:var(--ink)}
+
+/* ---------------- CÂU HỎI ---------------- */
+.qs{list-style:none;padding:0;margin:0;counter-reset:q;display:grid;gap:12px}
+.qs li{counter-increment:q;padding:22px 26px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+.qs .q{font-family:"Archivo",sans-serif;font-weight:800;font-size:18px;letter-spacing:-.026em;margin:0 0 9px;line-height:1.32;color:var(--brand-deep)}
+[data-theme="dark"] .qs .q{color:var(--ink)}
+.qs .q::before{
+  content:"Q" counter(q);font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;
+  background:var(--brand-wash);color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand-line);
+  padding:4px 9px;border-radius:100px;margin-right:12px;vertical-align:3px;letter-spacing:.06em;
+}
+.qs p{font-size:14.8px;color:var(--ink-2);margin:0}
+
+footer{border-top:1px solid var(--rule);padding:26px 0 52px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+@media(max-width:760px){
+  .wrap{padding:0 18px}
+  nav.tabs .wrap{padding:10px 18px}
+  header{padding-top:32px}
+  .axis-block{padding:22px 16px}
+  .tl-row{grid-template-columns:22px 1fr;gap:12px;align-items:start}
+  .tl-num{display:none}
+  .tl-node{grid-column:1;height:auto;padding-top:5px}
+  .tl-body{grid-column:2}
+  .tl-meta{grid-column:2;justify-content:flex-start;margin-top:7px}
+  .tl-gap,.tl-now{grid-template-columns:22px 1fr;gap:12px}
+  .tline-scroll{max-height:300px}
+  .mm-dot{width:17px;height:17px;margin-left:-8.5px;top:8px}
+  .tl-gapline{grid-column:1}
+  .tl-gaptxt,.tl-nowbox{grid-column:2}
+  nav.tabs button{font-size:0;gap:0;padding:9px 13px}
+  nav.tabs button .num{font-size:12px;opacity:1}
+  .sechero{padding-top:26px}
+  .sechero .secnum{width:48px;height:48px;font-size:18px;border-radius:12px}
+  .week{grid-template-columns:1fr;gap:14px;padding:20px}
+  .week .wk{display:inline-block}
+  .gaps li{grid-template-columns:42px 1fr;gap:14px;padding:20px}
+  .gaps li::before{height:38px;font-size:14px}
+  .qs li{padding:18px 20px}
+  .pull{font-size:18px;padding:20px 22px}
+  table{font-size:13px}
+  th,td{padding:11px 12px}
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HƯỚNG DẪN DÙNG TEMPLATE (xoá khối comment này khi xuất bản)
+
+     Thay mọi {{PLACEHOLDER}}. Giữ nguyên toàn bộ class CSS.
+
+     TRỤC NHỊP: mỗi touchpoint là một khối .tp, thuộc tính
+     style="left:X%" với X = (ngày_TP - ngày_bắt_đầu) /
+     (ngày_review - ngày_bắt_đầu) * 100. Script analyze_input.py
+     trả sẵn các giá trị này ở khoá "timeline_positions" —
+     dùng thẳng, không tự tính.
+     Màu .mk: var(--patina) tích cực · var(--ink-3) trung lập ·
+     var(--oxide) tiêu cực.
+     Khối .silence phủ từ touchpoint cuối đến 100%.
+
+     COMPONENT CÓ SẴN:
+     .card · .quote (trích nguyên văn) · .correction (khối đính
+     chính, BẮT BUỘC có ít nhất 1) · .pull / .pull.good (câu
+     chốt) · .gaps (danh sách lỗ hổng đánh số) · .week (một tuần
+     trong kế hoạch) · .stop (tiêu chí dừng, BẮT BUỘC) ·
+     .qs (câu hỏi mở) · .pill.no/.part/.yes · .sev.hi/.md/.new
+     .gph.done/.here/.burning (ô B-phase)
+     .sechero (banner đầu mỗi tab: số + tên mục — BẮT BUỘC)
+     .hl / .hl-bad / .hl-ok (highlight mạnh trong câu)
+     .amb (gạch chân lượn sóng: dữ liệu chưa chắc chắn) + .amb-key (chú thích ký hiệu)
+     ĐỔI MÀU THƯƠNG HIỆU: sửa 2 dòng --brand ở đầu khối <style>.
+     ============================================================ -->
+
+<div class="wrap">
+<header>
+  <div class="topbar">
+    <div class="eyebrow">Review hành trình deal · {{BEN_BAN}} × {{TEN_KHACH_HANG}} · {{NGAY_BAT_DAU}} – {{NGAY_REVIEW}}</div>
+    <button class="tgl" id="tgl" aria-label="Đổi giao diện sáng tối">Sáng · Tối</button>
+  </div>
+  <h1>{{LUAN_DIEM_CHINH}}</h1>
+  <p class="subthesis">{{LUAN_DIEM_PHU}}</p>
+  <p class="standfirst">{{TOM_TAT_MO_DAU}}</p>
+  <div class="metastrip">
+    <div><div class="k">Độ dài deal</div><div class="v">{{SO_NGAY}} ngày</div></div>
+    <div><div class="k">Buổi có EB trọn vẹn</div><div class="v bad">{{EB_TRON_VEN}} / {{TONG_TP}}</div></div>
+    <div><div class="k">Ngày không tiếp cận EB</div><div class="v bad">{{NGAY_KHONG_GAP_EB}} · ngưỡng 14</div></div>
+    <div><div class="k">MEDDPICC đạt</div><div class="v bad">{{MEDD_DAT}} / 8</div></div>
+    <div><div class="k">Cổng {{PHASE_KE}} đã mở</div><div class="v bad">{{CONG_TRANG_THAI}}</div></div>
+  </div>
+</header>
+
+<div class="axis-block">
+  <div class="axis-head">
+    <div class="axis-title">Trục nhịp deal — {{N}} touchpoint trên {{SO_NGAY}} ngày</div>
+    <div class="legend">
+      <span><i class="dot d-pos"></i> Tích cực</span>
+      <span><i class="dot d-neu"></i> Trung lập</span>
+      <span><i class="dot d-neg"></i> Tiêu cực</span>
+    </div>
+  </div>
+
+  <!-- LỚP 1 — minimap tỉ lệ thật. CHỈ chấm tròn, KHÔNG nhãn chữ.
+       left:% lấy từ timeline_positions[].left_pct. title= để hover. -->
+  <div class="mm-wrap">
+    <div class="mm-cap">Lớp 1 · Nhịp thật, vẽ đúng tỉ lệ ngày</div>
+    <div class="minimap">
+      <div class="mm-rail"></div>
+      <div class="mm-silence" style="left:{{VI_TRI_TP_CUOI}}%;width:{{RONG}}%"></div>
+      <button type="button" class="mm-dot pos" data-tp="1" style="left:0%" title="TP 01 · {{NGAY}} · {{NHAN}}" aria-label="..."></button>
+      <button type="button" class="mm-dot neu" data-tp="2" style="left:{{VI_TRI}}%" title="..." aria-label="..."></button>
+    </div>
+    <p class="mm-hint">Bấm vào một chấm bất kỳ để nhảy tới buổi tương ứng trong danh sách bên dưới.</p>
+    <div class="mm-scale"><span>{{NGAY_DAU}}</span><span>{{NGAY_REVIEW}} · mốc review</span></div>
+    <p class="mm-note">{{DIEN_GIAI_NHIP}}</p>
+  </div>
+
+  <!-- LỚP 2 — danh sách dọc. Mỗi buổi 1 .tl-row, xen giữa là .tl-gap.
+       Chiều cao .tl-gapline = max(16, min(16 + days*0.55, 78)) px.
+       days >= 21 → thêm class "long"; days >= 60 → "dead". Kết thúc bằng .tl-now. -->
+  <div class="tline-box">
+    <div class="tline-scroll" id="tlPane">
+      <ol class="tline">
+    <li class="tl-row" id="tp-1">
+      <div class="tl-num">TP 01</div>
+      <div class="tl-node"><span class="tl-mk pos"></span></div>
+      <div class="tl-body"><div class="tl-date">{{NGAY}}</div><div class="tl-name">{{MO_TA_NGAN}}</div></div>
+      <div class="tl-meta"><span class="tl-eb">EB có mặt</span><span class="pill yes">Tích cực</span></div>
+    </li>
+    <li class="tl-gap long"><span class="tl-gapline" style="height:{{H}}px"></span><span class="tl-gaptxt">{{N}} ngày <em>— {{LY_DO}}</em></span></li>
+    <li class="tl-now"><span class="tl-gapline" style="height:{{H}}px"></span>
+      <div class="tl-nowbox"><b>{{N}} ngày im lặng</b> {{DIEN_GIAI}}</div></li>
+      </ol>
+    </div>
+  </div>
+</div>
+</div>
+
+<nav class="tabs" role="tablist" aria-label="Các phần phân tích">
+  <div class="wrap">
+    <button role="tab" aria-selected="true"  data-p="p1"><span class="num">01</span>Chẩn đoán</button>
+    <button role="tab" aria-selected="false" data-p="p2"><span class="num">02</span>Đối chiếu cổng</button>
+    <button role="tab" aria-selected="false" data-p="p3"><span class="num">03</span>Phản biện</button>
+    <button role="tab" aria-selected="false" data-p="p4"><span class="num">04</span>Lỗ hổng</button>
+    <button role="tab" aria-selected="false" data-p="p5"><span class="num">05</span>Kế hoạch 4 tuần</button>
+    <button role="tab" aria-selected="false" data-p="p6"><span class="num">06</span>Câu hỏi mở</button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- TAB 01 — bảng chỉ số + 3 card tín hiệu + khối .quote nêu chỗ dữ liệu tự mâu thuẫn -->
+<section class="panel on" id="p1" role="tabpanel">
+  <div class="sechero"><span class="secnum">01</span><span class="secname">Chẩn đoán<span class="secsub">{{PHU_DE_MUC}}</span></span></div>
+  <h2>{{TIEU_DE_01}}</h2>
+  <p class="lede">{{DAN_NHAP_01}}</p>
+  <table>
+    <thead><tr><th>Chỉ số</th><th>Thực tế</th><th>Đọc ra điều gì</th></tr></thead>
+    <tbody>
+      <tr><td>{{CHI_SO}}</td><td class="num bad">{{GIA_TRI}}</td><td>{{DIEN_GIAI}}</td></tr>
+    </tbody>
+  </table>
+  <h3>Ba tín hiệu quan trọng nhất</h3>
+  <div class="cols">
+    <div class="card"><span class="tag">{{NHAN}}</span><h4>{{TIEU_DE}}</h4><p>{{NOI_DUNG}}</p></div>
+  </div>
+  <div class="quote"><span class="src">{{NGUON}}</span><p>{{TRICH_NGUYEN_VAN}}</p></div>
+</section>
+
+<!-- TAB 02 — sơ đồ B-phase + bảng MEDDPICC 8 dòng + câu kết về forecast -->
+<section class="panel" id="p2" role="tabpanel">
+  <div class="sechero"><span class="secnum">02</span><span class="secname">Đối chiếu cổng<span class="secsub">{{PHU_DE_MUC}}</span></span></div>
+  <h2>{{TIEU_DE_02}}</h2>
+  <p class="lede">{{DAN_NHAP_02}}</p>
+  <div class="gates"><div class="gscroll">
+    <div class="grow">
+      <div class="gph done"><div class="code">B0</div><div class="nm">Qualify</div><ul><li>{{EXIT}}</li></ul><span class="st pill yes">{{TRANG_THAI}}</span></div>
+      <div class="gph here"><div class="code">B1</div><div class="nm">Chuẩn bị / Định hình</div><ul><li>{{EXIT}}</li></ul><span class="st pill part">{{TRANG_THAI}}</span></div>
+      <div class="gph burning"><div class="code">B2</div><div class="nm">Quyết tâm / Commit</div><ul><li>{{EXIT}}</li></ul><span class="st pill no">{{TRANG_THAI}}</span></div>
+      <div class="gph burning"><div class="code">B3</div><div class="nm">Tác chiến &amp; Kết sổ</div><ul><li>{{EXIT}}</li></ul><span class="st pill no">{{TRANG_THAI}}</span></div>
+    </div>
+    <div class="gatebar"><div>gate ✓</div><div class="broken">gate ✗</div><div class="broken">gate ✗</div><div>&nbsp;</div></div>
+    <div class="leap"><div class="bar"></div><div class="txt">{{NHAN_DOT_NGUON_LUC}}</div></div>
+  </div></div>
+  <div class="quote"><span class="src">Playbook · {{MUC}}</span><p>{{TRICH}}</p></div>
+  <h3>Bảng chấm MEDDPICC — trạng thái hiện tại</h3>
+  <table>
+    <thead><tr><th style="width:150px">Yếu tố</th><th style="width:110px">Trạng thái</th><th>Bằng chứng / khoảng trống</th></tr></thead>
+    <tbody><tr><td class="k">{{YEU_TO}}</td><td><span class="pill no">{{TRANG_THAI}}</span></td><td>{{BANG_CHUNG}}</td></tr></tbody>
+  </table>
+  <p style="margin-top:18px"><strong>{{TONG_KET_DIEM}}</strong> {{CAU_VE_FORECAST}}</p>
+</section>
+
+<!-- TAB 03 — phản biện giả định trung tâm; BẮT BUỘC có ≥1 khối .correction -->
+<section class="panel" id="p3" role="tabpanel">
+  <div class="sechero"><span class="secnum">03</span><span class="secname">Phản biện<span class="secsub">{{PHU_DE_MUC}}</span></span></div>
+  <h2>{{TIEU_DE_03}}</h2>
+  <p class="lede">{{DAN_NHAP_03}}</p>
+  <div class="pull">{{GIA_DINH_TRUNG_TAM}}</div>
+  <h3>{{LUAN_DIEM}}</h3>
+  <p>{{NOI_DUNG}}</p>
+  <div class="correction"><span class="src">Đính chính</span><p>{{CHO_CO_THE_DANG_SAI}}</p></div>
+  <div class="pull">{{CAU_CHOT}}</div>
+</section>
+
+<!-- TAB 04 — danh sách lỗ hổng; .sev.hi chặn deal · .sev.md rủi ro cao · .sev.new mới phát hiện -->
+<section class="panel" id="p4" role="tabpanel">
+  <div class="sechero"><span class="secnum">04</span><span class="secname">Lỗ hổng<span class="secsub">{{PHU_DE_MUC}}</span></span></div>
+  <h2>{{TIEU_DE_04}}</h2>
+  <p class="lede">{{DAN_NHAP_04}}</p>
+  <ul class="gaps">
+    <li><div><h4>{{TEN_LO_HONG}} <span class="sev hi">Chặn deal</span></h4><p>{{MO_TA}}</p><p>{{HE_QUA}}</p></div></li>
+  </ul>
+</section>
+
+<!-- TAB 05 — 4 tuần + khối "Xuyên suốt" + .stop BẮT BUỘC -->
+<section class="panel" id="p5" role="tabpanel">
+  <div class="sechero"><span class="secnum">05</span><span class="secname">Kế hoạch<span class="secsub">{{PHU_DE_MUC}}</span></span></div>
+  <h2>{{TIEU_DE_05}}</h2>
+  <p class="lede">{{NGUYEN_TAC_XUYEN_SUOT}}</p>
+  <div class="week">
+    <div class="wk">Tuần 1<small>{{KHOANG_NGAY}}</small></div>
+    <div>
+      <h4>{{MUC_TIEU_TUAN}}</h4>
+      <ul class="todo">
+        <li><span class="deliv">Deliverable</span><strong>{{TEN_ARTEFACT}}</strong> — {{MO_TA}}</li>
+        <li>{{HANH_DONG}}</li>
+      </ul>
+    </div>
+  </div>
+  <div class="stop"><span class="tag">Tiêu chí dừng</span><p>{{TIEU_CHI_DUNG}}</p></div>
+</section>
+
+<!-- TAB 06 — câu hỏi mở, mỗi câu là chỗ dữ liệu còn trống -->
+<section class="panel" id="p6" role="tabpanel">
+  <div class="sechero"><span class="secnum">06</span><span class="secname">Câu hỏi mở<span class="secsub">{{PHU_DE_MUC}}</span></span></div>
+  <h2>{{TIEU_DE_06}}</h2>
+  <p class="lede">{{DAN_NHAP_06}}</p>
+  <ul class="qs">
+    <li><div class="q">{{CAU_HOI}}</div><p>{{TAI_SAO_QUAN_TRONG}}</p></li>
+  </ul>
+</section>
+
+<footer>
+  <span>{{BEN_BAN}} × {{TEN_KHACH_HANG}} · Review hành trình deal · {{NGAY_REVIEW}}</span>
+  <span>Nguồn: {{NGUON_DU_LIEU}}</span>
+</footer>
+</div>
+
+<script>
+(function(){
+  var tabs=document.querySelectorAll('nav.tabs button');
+  var panels=document.querySelectorAll('section.panel');
+  tabs.forEach(function(t){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.setAttribute('aria-selected','false')});
+      panels.forEach(function(p){p.classList.remove('on')});
+      t.setAttribute('aria-selected','true');
+      document.getElementById(t.dataset.p).classList.add('on');
+      window.scrollTo({top:document.querySelector('nav.tabs').offsetTop-1,behavior:'smooth'});
+    });
+  });
+  var btn=document.getElementById('tgl'),root=document.documentElement;
+  btn.addEventListener('click',function(){
+    root.setAttribute('data-theme',root.getAttribute('data-theme')==='dark'?'light':'dark');
+  });
+})();
+
+(function(){
+  var pane = document.getElementById('tlPane');
+  var dots = document.querySelectorAll('.mm-dot');
+  var rows = document.querySelectorAll('.tl-row');
+  if(!pane) return;
+  function activate(n, scroll){
+    dots.forEach(function(d){ d.classList.toggle('is-active', d.dataset.tp === String(n)); });
+    rows.forEach(function(r){ r.classList.remove('is-target'); });
+    var row = document.getElementById('tp-' + n);
+    if(!row) return;
+    row.classList.add('is-target');
+    if(scroll){ pane.scrollTo({ top: row.offsetTop - pane.offsetTop - 12, behavior: 'smooth' }); }
+  }
+  dots.forEach(function(d){ d.addEventListener('click', function(){ activate(d.dataset.tp, true); }); });
+  var tick;
+  pane.addEventListener('scroll', function(){
+    clearTimeout(tick);
+    tick = setTimeout(function(){
+      var best=null, bestD=Infinity;
+      rows.forEach(function(r){
+        var d = Math.abs(r.offsetTop - pane.offsetTop - pane.scrollTop - 20);
+        if(d < bestD){ bestD = d; best = r; }
+      });
+      if(best){ var n = best.id.replace('tp-',''); dots.forEach(function(d){ d.classList.toggle('is-active', d.dataset.tp === n); }); }
+    }, 70);
+  });
+  activate(1, false);
+})();
+
+</script>
+</body>
+</html>

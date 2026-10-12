@@ -1,0 +1,33 @@
+{
+  "name": "memehael",
+  "owner": {
+    "name": "MemeHael"
+  },
+  "plugins": [
+    {
+      "name": "base-solution-design",
+      "source": "./plugins/base-solution-design",
+      "description": "Tư vấn và thiết kế giải pháp số hóa (Techmap CASAN, chuỗi giá trị, CRM map)"
+    },
+    {
+      "name": "base-delivery",
+      "source": "./plugins/base-delivery",
+      "description": "Triển khai, báo cáo và lưu đồ quy trình cho khách hàng Base"
+    },
+    {
+      "name": "base-inventory",
+      "source": "./plugins/base-inventory",
+      "description": "Thiết lập tồn kho theo lô trên Base.vn"
+    },
+    {
+      "name": "base-sales",
+      "source": "./plugins/base-sales",
+      "description": "Phân tích hành trình deal Enterprise B2B"
+    },
+    {
+      "name": "meme-brand",
+      "source": "./plugins/meme-brand",
+      "description": "Chuẩn giao diện Meme / Rework keynote"
+    }
+  ]
+}

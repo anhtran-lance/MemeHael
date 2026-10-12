@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>[TÊN BỘ QUY TRÌNH] — Mô tả luồng xử lý trên hệ thống</title>
+<!--
+  TEMPLATE — QT Flow Doc Designer
+  Cách dùng:
+  1. Đổi 5 biến màu trong :root theo brand KH (xem references/design-system.md).
+     --navy = màu chủ đạo; --orange = màu nhấn (bước kết thúc).
+  2. Điền nội dung vào các vùng [ ... ] bên dưới bằng component trong
+     references/component-library.md.
+  3. Khi render: KHÔNG dùng link Google Fonts — chạy embed_fonts.py để nhúng
+     Inter + Barlow (có subset vietnamese). Dòng <link> bên dưới chỉ để xem thử
+     trên trình duyệt; embed_fonts.py sẽ tự gỡ nó ra.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ====== ĐỔI THEO BRAND KH ====== */
+    --navy:#0B4DA2;      /* màu chủ đạo — bước bắt buộc */
+    --orange:#F26B21;    /* màu nhấn — bước kết thúc / chuyển bước */
+    --master-bg:#FFF7F2; /* nền lane quy trình tổng (tint nhạt của màu chủ đạo) */
+    /* ====== GIỮ CỐ ĐỊNH (ý nghĩa ký hiệu) ====== */
+    --teal:#0E9384; --teal-bg:#E7F6F4; --teal-ink:#0A5F56;  /* bước tùy chọn */
+    --cond:#6D4AC4; --cond-bg:#F3EFFC;                        /* điều kiện / trực tiếp */
+    --red:#D64545; --red-bg:#FCEEEE;                          /* ngoài hệ thống / chuyển Unit */
+    --ink:#0A2540; --ink-soft:#5A6B7F; --line:#C9D4E0;
+    --paper:#FFFFFF; --panel:#F6F8FB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#E9EDF2;font-family:'Inter',system-ui,sans-serif;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;gap:22px;padding:24px}
+  .sheet{width:297mm;height:210mm;background:var(--paper);padding:11mm 10mm 9mm;
+    display:flex;flex-direction:column;box-shadow:0 6px 30px rgba(10,37,64,.16);position:relative}
+  .sheet::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;
+    background:linear-gradient(90deg,var(--navy) 0 62%,var(--orange) 62% 100%)}
+
+  /* header */
+  header{display:flex;align-items:flex-end;justify-content:space-between;
+    border-bottom:1.5px solid var(--ink);padding-bottom:6px;margin-bottom:9px}
+  .eyebrow{font-family:'Barlow Semi Condensed',sans-serif;font-weight:600;font-size:10px;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft)}
+  h1{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:25px;
+    letter-spacing:.02em;text-transform:uppercase;line-height:1.05;margin-top:2px}
+  h1 .qt{color:var(--orange)}
+  .hd-right{text-align:right;font-size:9px;color:var(--ink-soft);line-height:1.6}
+  .hd-right b{color:var(--ink);font-weight:600}
+  .pg{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:10px;
+    letter-spacing:.16em;color:var(--orange)}
+
+  /* phase band (vạch ngăn ngoài/trên hệ thống) */
+  .phase-band{display:flex;gap:10px;margin-bottom:3px;align-items:stretch}
+  .pb-spacer{width:150px;flex:0 0 150px}
+  .pb-real,.pb-base{border-radius:6px 6px 0 0;padding:3px 10px;display:flex;align-items:center;gap:6px;
+    font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase}
+  .pb-real{flex:0 0 150px;background:var(--red-bg);color:var(--red);border:1px solid #F1D2D2;border-bottom:0}
+  .pb-base{flex:1;background:var(--teal-bg);color:var(--teal-ink);border:1px solid #BFE5E0;border-bottom:0}
+  .pb-tag{font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;letter-spacing:.04em}
+  .pb-real .pb-tag{background:var(--red);color:#fff}
+  .pb-base .pb-tag{background:var(--teal);color:#fff}
+
+  /* master (quy trình tổng) */
+  .master{display:flex;gap:10px;align-items:stretch;margin-bottom:7px}
+  .m-head{width:150px;flex:0 0 150px;border-left:3px solid var(--orange);padding-left:8px;
+    display:flex;flex-direction:column;justify-content:center}
+  .master.indep .m-head{border-left-color:var(--teal)}
+  .tag{display:inline-block;font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;
+    font-size:10px;letter-spacing:.1em;color:#fff;background:var(--orange);padding:1px 6px;
+    border-radius:3px;margin-bottom:4px;width:fit-content}
+  .master.indep .tag{background:var(--teal)}
+  .m-name{font-size:10.5px;font-weight:700;line-height:1.25}
+  .m-sub{font-size:7.6px;color:var(--ink-soft);line-height:1.35;margin-top:4px}
+  .m-sub b{color:var(--ink)}
+  .m-body{flex:1;background:var(--master-bg);border:1px solid #F7D3BC;border-radius:8px;
+    padding:7px 10px;display:flex;flex-direction:column;gap:6px}
+  .master.indep .m-body{background:var(--teal-bg);border-color:#BFE5E0}
+  .track{display:flex;align-items:center;min-width:0}
+
+  /* row trong master (theo loại/nhánh) */
+  .trow{display:flex;align-items:stretch;min-width:0}
+  .tlab{flex:0 0 96px;display:flex;flex-direction:column;justify-content:center;padding-right:8px}
+  .tlab .th{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:9.5px;
+    letter-spacing:.04em;color:var(--ink);line-height:1.15}
+  .tlab .td{font-size:7.2px;color:var(--ink-soft);line-height:1.25;margin-top:2px}
+
+  .seg-real{flex:0 0 108px;display:flex;align-items:center;background:var(--red-bg);
+    border:1px dashed #E3A9A9;border-radius:6px;padding:4px 6px}
+  .seg-base{flex:1;display:flex;align-items:center;padding-left:8px;margin-left:8px;
+    border-left:2px solid var(--ink-soft);position:relative}
+  .seg-base::before{content:"";position:absolute;left:-5px;top:50%;width:6px;height:6px;
+    border-radius:50%;background:var(--ink-soft);transform:translateY(-50%)}
+
+  /* block bước */
+  .step{position:relative;flex:1;min-width:0;min-height:31px;border-radius:6px;background:var(--navy);
+    color:#fff;font-size:7.6px;font-weight:600;line-height:1.22;display:flex;align-items:center;
+    justify-content:center;text-align:center;padding:5px 4px}
+  .step.entry{background:#fff;color:var(--navy);border:1.6px solid var(--navy);font-weight:700}
+  .master.indep .step.entry{color:var(--teal-ink);border-color:var(--teal)}
+  .step.end{background:var(--orange)}
+  .master.indep .step.end{background:var(--teal)}
+  .step.opt{background:var(--teal-bg);color:var(--teal-ink);border:1.4px dashed var(--teal)}
+  .step.back{background:#fff;color:var(--navy);border:1.4px dashed var(--navy)}
+  .step.merge{background:var(--red);color:#fff}
+  .step.gdn{background:#fff;color:var(--red);border:1.5px solid var(--red);font-weight:700}
+  .step.direct{background:var(--cond);color:#fff}
+  .step.split{background:var(--cond);color:#fff}
+  .num{position:absolute;top:-6px;left:-5px;width:13px;height:13px;border-radius:50%;background:#fff;
+    border:1.4px solid var(--navy);color:var(--navy);font-size:7px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;z-index:2}
+  .step.entry .num{border-color:var(--navy)}
+  .step.end .num{border-color:var(--orange);color:var(--orange)}
+  .step.opt .num{border-color:var(--teal);color:var(--teal)}
+  .arr{flex:0 0 11px;display:flex;align-items:center;justify-content:center;color:#9FB0C2}
+  .arr.r{color:#D8A0A0}
+
+  /* rẽ nhánh layout dọc */
+  .seg-col{flex-direction:column;align-items:stretch;gap:4px}
+  .seg-col::before{top:16px;transform:none}
+  .sb-common{display:flex;align-items:center;min-width:0}
+  .sb-forklbl{flex:0 0 auto;margin-left:8px;font-size:7px;font-weight:700;color:var(--cond);
+    background:var(--cond-bg);border:1px solid #D9CCF2;border-radius:3px;padding:1px 5px;white-space:nowrap}
+  .fk2-row{display:flex;align-items:center;min-width:0;padding-left:10px}
+  .fk2-cond{flex:0 0 44px;font-size:7.6px;font-weight:700;color:var(--cond);padding-right:6px;text-align:right;line-height:1.15}
+
+  /* notes card */
+  .notes{display:flex;gap:10px;flex:1;margin-bottom:5px}
+  .card{flex:1;border:1px solid var(--line);border-radius:8px;padding:7px 10px;display:flex;flex-direction:column}
+  .card.c1{border-left:3px solid var(--red);background:#FDF5F5}
+  .card.c2{border-left:3px solid var(--cond);background:#FBF9FF}
+  .card.c3{border-left:3px solid var(--teal);background:#F1FBFA}
+  .ctitle{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:9.5px;
+    letter-spacing:.11em;text-transform:uppercase;margin-bottom:6px}
+  .c1 .ctitle{color:var(--red)}.c2 .ctitle{color:var(--cond)}.c3 .ctitle{color:var(--teal-ink)}
+  ul.tick{list-style:none}
+  ul.tick li{position:relative;padding-left:11px;font-size:7.6px;line-height:1.35;margin-bottom:3px}
+  ul.tick li:last-child{margin-bottom:0}
+  ul.tick li::before{content:"";position:absolute;left:0;top:5px;width:5px;height:5px;border-radius:50%}
+  .c1 ul.tick li::before{background:var(--red)}
+  .c2 ul.tick li::before{background:var(--cond)}
+  .c3 ul.tick li::before{background:var(--teal)}
+  .card b{font-weight:700}
+
+  /* footer: legend + bảng ánh xạ */
+  footer{display:flex;gap:12px;margin-top:auto;padding-top:6px;border-top:1.5px solid var(--ink)}
+  .legend{flex:0 0 36%}
+  .mech{flex:1;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--orange);
+    border-radius:6px;padding:8px 11px}
+  .ftitle{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:10px;
+    letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px}
+  .lg-item{display:flex;align-items:center;gap:7px;font-size:7.7px;margin-bottom:3.5px;line-height:1.28}
+  .sw{flex:0 0 20px;height:11px;border-radius:3px}
+  .sw.navy{background:var(--navy)}.sw.entry{background:#fff;border:1.5px solid var(--navy)}
+  .sw.end{background:var(--orange)}.sw.opt{background:var(--teal-bg);border:1.3px dashed var(--teal)}
+  .sw.back{background:#fff;border:1.3px dashed var(--navy)}.sw.merge{background:var(--red)}
+  .sw.direct{background:var(--cond)}.sw.teal{background:var(--teal)}.sw.cond{background:var(--cond-bg);border:1.3px dashed var(--cond)}
+  .sw.link{background:none;border:0;border-top:1.5px dashed var(--navy);height:0;border-radius:0}
+  .divmark{flex:0 0 20px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--ink-soft)}
+  table.map{width:100%;border-collapse:collapse;font-size:7.8px}
+  table.map th{font-size:7.2px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);
+    text-align:left;padding:0 6px 3px 0;font-weight:600}
+  table.map td{padding:2.5px 6px 2.5px 0;vertical-align:top;line-height:1.3;border-top:1px solid #E3E9F0}
+  table.map td b{font-weight:700}
+  .note{font-size:7.7px;color:var(--ink-soft);margin-top:5px;line-height:1.4}
+  .note b{color:var(--ink)}
+
+  /* lane QT con (trang 2) */
+  .lane{display:flex;align-items:stretch;gap:10px;margin-bottom:4px}
+  .lane-head{width:120px;flex:0 0 120px;border-left:3px solid var(--navy);padding-left:8px;
+    display:flex;flex-direction:column;justify-content:center}
+  .lane .tag{background:var(--navy)}
+  .lane-name{font-size:10px;font-weight:700;line-height:1.25}
+  .lane-body{flex:1;display:flex;align-items:center;background:var(--panel);
+    border:1px solid var(--line);border-radius:8px;padding:3px 9px}
+  .lane .step{min-height:30px;font-size:7.5px}
+  .lane .num{border-color:var(--navy)}
+  .lane .step.end .num{border-color:var(--orange);color:var(--orange)}
+  .branch{background:#fff;border:1.4px dashed var(--cond);border-radius:8px;padding:4px 10px 3px;margin-bottom:4px}
+  .branch-hd{font-family:'Barlow Semi Condensed',sans-serif;font-weight:700;font-size:8.5px;
+    letter-spacing:.13em;text-transform:uppercase;color:var(--cond);margin-bottom:5px}
+  .brow{display:flex;align-items:center;margin-bottom:3px}
+  .brow:last-child{margin-bottom:0}
+  .bcond{flex:0 0 118px;font-size:7.6px;font-weight:700;color:var(--cond);text-align:right;padding-right:8px;line-height:1.25}
+  .brow .step{flex:0 0 150px;min-height:26px}
+  .brow .bsp{flex:1}
+
+  @page{size:A4 landscape;margin:0}
+  @media print{
+    body{background:#fff;padding:0;gap:0}
+    .sheet{box-shadow:none;page-break-after:always}
+    .sheet:last-child{page-break-after:auto}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ TRANG 1 ============ -->
+<div class="sheet">
+  <header>
+    <div>
+      <div class="eyebrow">Mô tả luồng xử lý sau thiết lập trên hệ thống</div>
+      <h1><span class="qt">[MÃ]</span> [TÊN BỘ QUY TRÌNH]</h1>
+    </div>
+    <div class="hd-right">
+      <span class="pg">TRANG 1 / N</span><br>
+      [Tóm tắt cấu trúc: mấy QT tổng, mấy QT con]
+    </div>
+  </header>
+
+  <!-- [VÙNG LUỒNG — dùng component master / trow / seg-real + seg-base] -->
+
+  <!-- [VÙNG NOTES — 1-3 card giải thích cơ chế] -->
+
+  <footer>
+    <div class="legend">
+      <div class="ftitle">Chú thích</div>
+      <!-- [các dòng lg-item theo ký hiệu đã dùng] -->
+    </div>
+    <div class="mech">
+      <div class="ftitle">Ánh xạ bước QT tổng ↔ QT con</div>
+      <!-- [bảng map] -->
+    </div>
+  </footer>
+</div>
+
+<!-- ============ TRANG 2 (nếu có QT con) ============ -->
+<!--
+<div class="sheet">
+  <header> ... </header>
+  <div style="flex:1">
+    [các lane QT con]
+  </div>
+  <footer> [chú thích + lưu ý] </footer>
+</div>
+-->
+
+</body>
+</html>
