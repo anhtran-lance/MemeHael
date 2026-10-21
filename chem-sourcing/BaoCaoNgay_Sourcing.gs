@@ -891,7 +891,8 @@ function loadForm_(accs) {
 /* Tên giai đoạn đã biết (stage_id -> tên cột trên bảng quy trình CRM). Account không có stage_id (hoặc 0) = Unstaged.
    Mã chưa biết sẽ hiện số ID: chạy menu "Xem các giai đoạn CRM (stage_id)" để biết ID nào đang dùng, rồi thêm vào đây,
    ví dụ: 2294: 'Newly added'. Tên phải khớp từng chữ với PIPELINE ở đầu file. */
-const STAGE_NAMES = { 0: 'Unstaged', 2295: 'Contacting', 2301: 'Đúng hàng/ Tiềm năng' };
+const STAGE_NAMES = { 0: 'Unstaged', 2294: 'Newly added', 2295: 'Contacting', 2297: 'Sai hàng/ Không tiềm năng',
+  2298: 'Đúng hàng/ Tiềm năng', 2299: 'Verified', 2300: 'Quality Approved', 2301: 'Ordered', 2303: 'Hold' };
 function stageName_(id) { const n = Number(id) || 0; return STAGE_NAMES[n] !== undefined ? STAGE_NAMES[n] : String(id); }
 
 /* Trường tuỳ chỉnh của account nằm trong mảng account.form (mỗi phần tử: id, code, name, value, display, type).
