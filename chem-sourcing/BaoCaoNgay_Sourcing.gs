@@ -14,8 +14,7 @@
  * CÁCH DÙNG
  *  1. Tiện ích > Apps Script > dán toàn bộ file này > Lưu.
  *  2. Chạy hàm setupAll (cấp quyền lần đầu) > tải lại Sheet để hiện menu "Báo cáo Sourcing".
- *  3. Menu "Nạp dữ liệu DEMO" để xem thử giao diện (xóa bằng "Xóa dữ liệu").
- *  4. Kết nối thật: Lưu token (v1) > Lưu password > Kiểm tra kết nối API > Xem trường tuỳ chỉnh account
+ *  3. Kết nối: Lưu token (v1) > Lưu password > Kiểm tra kết nối API > Xem trường tuỳ chỉnh account
  *     > điền FIELD_MAP bên dưới > Đồng bộ account > Đồng bộ activity > Cài lịch tự động.
  *
  * GIAI ĐOẠN (Stage): lấy từ stage_id của CRM, ánh xạ qua STAGE_NAMES bên dưới. Trường "Status" KHÔNG dùng.
@@ -127,8 +126,8 @@ const DC = { id: 'A', created: 'B', updated: 'C', owner: 'D', name: 'E', isNew: 
   product: 'I', potential: 'J', qty: 'K', value: 'L', ref: 'M', stage: 'N', note: 'O', contact: 'P', confirm: 'Q',
   person: 'S', group: 'T', upd: 'U' };
 const ACT_HEADERS = ['Activity ID', 'Ngày', 'Giờ', 'Account ID', 'Tên account', 'Người tạo (ID)', 'Loại',
-  'Nội dung / Note', 'Kênh liên hệ', 'Mẫu (Gửi/Nhận)'];
-const AC = { id: 'A', date: 'B', acc: 'D', user: 'F', chan: 'I', sample: 'J', person: 'L' };
+  'Nội dung / Note', 'Kênh liên hệ'];
+const AC = { id: 'A', date: 'B', acc: 'D', user: 'F', chan: 'I', person: 'L' };
 
 const dCol_ = (k) => D_ + '$' + DC[k] + ':$' + DC[k];            // cả cột sheet dữ liệu
 const dRng_ = (k) => D_ + '$' + DC[k] + '$2:$' + DC[k];          // từ hàng 2 (dùng cho FILTER)
@@ -138,7 +137,6 @@ const aCol_ = (k) => A_ + '$' + AC[k] + ':$' + AC[k];            // cả cột s
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('Báo cáo Sourcing')
     .addItem('1. Dựng / dựng lại giao diện', 'setupAll')
-    .addItem('2. Nạp dữ liệu DEMO', 'seedDemoData')
     .addItem('Xóa lịch tự động cũ', 'removeAllTriggers')
     .addItem('3. Lưu token CRM (v1)', 'saveToken')
     .addItem('3b. Lưu password API Sales', 'savePassword')
@@ -236,21 +234,10 @@ function buildDataSheet_(ss) {
 }
 
 /* ---------- Sheet 3: Danh sách nhân sự ---------- */
-/* Xóa 3 nhân sự mẫu (ferrie, sourcing_b, sourcing_c) không có trên hệ thống; giữ nguyên các dòng còn lại và dồn lên trên */
-function removeDemoStaff_(sh) {
-  const demo = { 'ferrie': 1, 'sourcing_b': 1, 'sourcing_c': 1 };
-  const r = sh.getRange(2, 1, 199, 10), v = r.getValues();
-  const keep = v.filter(x => x[0] !== '' && !demo[String(x[0]).trim().toLowerCase()]);
-  if (keep.length === v.filter(x => x[0] !== '').length) return;
-  r.clearContent();
-  sh.getRange('A2:A200').setNumberFormat('@');
-  if (keep.length) sh.getRange(2, 1, keep.length, 10).setValues(keep);
-}
 function buildStaffSheet_(ss) {
   const sh = getOrCreate_(ss, SH.STAFF);
   const h = ['ID chủ sở hữu trên CRM (owner_id)', 'Họ tên hiển thị', 'Chức danh', 'Nhóm', 'Tính vào báo cáo? (Có/Không)',
-    'Target Quantity (tháng)', 'Target Total Sourcing Value', 'Target New Supplier', 'Target Sending Samples',
-    'Target Receiving Samples'];
+    'Target Quantity (tháng)', 'Target Total Sourcing Value', 'Target New Supplier'];
   sh.getRange(1, 1, 1, h.length).setValues([h]);
   styleHeader_(sh.getRange(1, 1, 1, h.length));
   sh.getRange('L1:M1').setValues([['Giai đoạn trên CRM', 'Nhóm báo cáo']]);
@@ -260,7 +247,6 @@ function buildStaffSheet_(ss) {
   sh.getRange('O2').setFormula(fx_('={"Tất cả";IFERROR(FILTER($B$2:$B,$E$2:$E="Có"),"")}'));
   sh.getRange('A2:A200').setNumberFormat('@');          // ID lưu dạng chữ để khớp với dữ liệu CRM
   sh.getRange('L2:L200').setNumberFormat('@');
-  removeDemoStaff_(sh);
   if (sh.getRange('L2').getValue() === '') {
     const map = [['Newly added', GRP.NEG], ['Contacting', GRP.NEG], ['Đúng hàng/ Tiềm năng', GRP.NEG], ['Verified', GRP.NEG],
       ['Quality Approved', GRP.PEND], ['Ordered', GRP.CONF], ['Sai hàng/ Không tiềm năng', GRP.LOST], ['Hold', GRP.LOST]];
@@ -270,12 +256,13 @@ function buildStaffSheet_(ss) {
   sh.getRange('E2:E200').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['Có', 'Không'], true).build());
   sh.getRange('M2:M200').setDataValidation(SpreadsheetApp.newDataValidation()
     .requireValueInList([GRP.PEND, GRP.CONF, GRP.NEG, GRP.LOST], true).build());
-  sh.getRange('F2:J200').setNumberFormat('#,##0');
+  sh.getRange('F2:H200').setNumberFormat('#,##0');
+  sh.getRange('I1:J200').clearContent();            // cột Sending/Receiving Samples cũ (đã bỏ)
   sh.getRange('Q1').setValue('HƯỚNG DẪN').setFontWeight('bold');
   sh.getRange('Q2:Q6').setValues([
     ['- Cột A: ID số của chủ sở hữu account trên CRM (owner_id) hoặc đúng giá trị cột "Chủ sở hữu" ở sheet dữ liệu.'],
     ['- Cột E = "Không" để loại nhân sự khỏi báo cáo (nghỉ việc, không thuộc Sourcing...).'],
-    ['- Cột F:J là target tháng; báo cáo tự cộng theo nhân sự được chọn.'],
+    ['- Cột F:H là target tháng; báo cáo tự cộng theo nhân sự được chọn.'],
     ['- Bảng L:M: ghi đúng tên (hoặc ID) giai đoạn của CRM và chọn nhóm báo cáo tương ứng.'],
     ['- Giai đoạn chưa ánh xạ được tính là "Khác" và không lên báo cáo (xem ô kiểm tra ở sheet dữ liệu).']
   ]).setFontColor('#666666');
@@ -290,6 +277,7 @@ function buildActSheet_(ss) {
   const sh = getOrCreate_(ss, SH.ACT);
   sh.getRange(1, 1, 1, ACT_HEADERS.length).setValues([ACT_HEADERS]);
   styleHeader_(sh.getRange(1, 1, 1, ACT_HEADERS.length));
+  sh.getRange('J1:J').clearContent();            // cột Mẫu (Gửi/Nhận) cũ (đã bỏ)
   sh.getRange('L1').setValue('Nhân sự (đối chiếu)');
   styleHeader_(sh.getRange('L1'), COLOR.helper);
   sh.getRange('L2').setFormula(fx_('=ARRAYFORMULA(IF($A$2:$A="","",IFERROR(VLOOKUP($F$2:$F,FILTER({' +
@@ -426,42 +414,34 @@ function buildReportSheet_(ss) {
   const stf = (col) => 'SUMIFS(' + S_ + '$' + col + ':$' + col + ',' + S_ + '$B:$B,$K$6,' + S_ + '$E:$E,"Có")';
   const WON = dCol_('person') + ',$K$6,' + dCol_('group') + ',"' + GRP.CONF + '",' + dCol_('confirm') + ',">="&$K$4,' +
     dCol_('confirm') + ',"<"&$K$5';
-  const actCnt = (kind) => 'COUNTIFS(' + aCol_('sample') + ',"' + kind + '",' + aCol_('date') + ',">="&$K$4,' +
-    aCol_('date') + ',"<"&$K$5,' + aCol_('person') + ',$K$6)';
 
   sh.getRange('B4').setFormula(fx_('="SOURCING: "&UPPER($F$3)'));
   sh.getRange('C4:D4').merge().setValue('Quantity');
   sh.getRange('E4').setValue('Total Sourcing Value');
   sh.getRange('F4').setValue('New Supplier');
-  sh.getRange('G4').setValue('Sending Samples');
-  sh.getRange('H4').setValue('Receiving Samples');
-  styleHeader_(sh.getRange('B4:H4'), COLOR.blue, COLOR.navy);
+  styleHeader_(sh.getRange('B4:F4'), COLOR.blue, COLOR.navy);
   sh.getRange('B5:B8').setValues([['TARGET THÁNG'], ['ĐÃ HOÀN THÀNH'], ['CẦN HOÀN THÀNH'], ['% HOÀN THÀNH']]);
   [5, 6, 7, 8].forEach(r => sh.getRange('C' + r + ':D' + r).merge());
   sh.getRange('C5').setFormula(fx_('=' + stf('F')));
   sh.getRange('E5').setFormula(fx_('=' + stf('G')));
   sh.getRange('F5').setFormula(fx_('=' + stf('H')));
-  sh.getRange('G5').setFormula(fx_('=' + stf('I')));
-  sh.getRange('H5').setFormula(fx_('=' + stf('J')));
   sh.getRange('C6').setFormula(fx_('=SUMIFS(' + dCol_('qty') + ',' + WON + ')'));
   sh.getRange('E6').setFormula(fx_('=SUMIFS(' + dCol_('value') + ',' + WON + ')'));
   sh.getRange('F6').setFormula(fx_('=COUNTIFS(' + dCol_('isNew') + ',"Có",' + dCol_('person') + ',$K$6,' + dCol_('created') +
     ',">="&$K$4,' + dCol_('created') + ',"<"&$K$5)'));
-  sh.getRange('G6').setFormula(fx_('=' + actCnt('Gửi')));
-  sh.getRange('H6').setFormula(fx_('=' + actCnt('Nhận')));
-  ['C', 'E', 'F', 'G', 'H'].forEach(c => {
+  ['C', 'E', 'F'].forEach(c => {
     sh.getRange(c + '7').setFormula(fx_('=MAX(0,' + c + '5-' + c + '6)'));
     sh.getRange(c + '8').setFormula(fx_('=IF(' + c + '5=0,"",' + c + '6/' + c + '5)'));
   });
   sh.getRange('C5:E7').setNumberFormat('#,##0');
-  sh.getRange('F5:H7').setNumberFormat('0');
-  sh.getRange('C8:H8').setNumberFormat('0%');
-  sh.getRange('B5:H8').setHorizontalAlignment('center').setFontSize(11);
+  sh.getRange('F5:F7').setNumberFormat('0');
+  sh.getRange('C8:F8').setNumberFormat('0%');
+  sh.getRange('B5:F8').setHorizontalAlignment('center').setFontSize(11);
   sh.getRange('B5:B8').setFontWeight('bold').setBackground(COLOR.blue).setFontColor(COLOR.navy);
-  sh.getRange('C6:H6').setFontWeight('bold').setFontSize(13).setFontColor(COLOR.navy);
-  sh.getRange('B8:H8').setBackground(COLOR.band).setFontWeight('bold');
+  sh.getRange('C6:F6').setFontWeight('bold').setFontSize(13).setFontColor(COLOR.navy);
+  sh.getRange('B8:F8').setBackground(COLOR.band).setFontWeight('bold');
   sh.getRange('B8').setBackground(COLOR.blue);
-  border_(sh.getRange('B4:H8'));
+  border_(sh.getRange('B4:F8'));
 
   pipelineBlocks_(sh);
   sectionBand_(sh, 41, 'NCC MỚI & CHUYỂN GIAI ĐOẠN TRONG NGÀY');
@@ -487,8 +467,8 @@ function buildReportSheet_(ss) {
   const rules = [];
   const ruleF = (formula, bg, range) => SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied(fx_(formula))
     .setBackground(bg).setRanges([range]).build();
-  rules.push(ruleF('=AND(ISNUMBER(C$8),C$8>=$K$8)', COLOR.ok, sh.getRange('C8:H8')));
-  rules.push(ruleF('=AND(ISNUMBER(C$8),C$8<$K$8)', COLOR.bad, sh.getRange('C8:H8')));
+  rules.push(ruleF('=AND(ISNUMBER(C$8),C$8>=$K$8)', COLOR.ok, sh.getRange('C8:F8')));
+  rules.push(ruleF('=AND(ISNUMBER(C$8),C$8<$K$8)', COLOR.bad, sh.getRange('C8:F8')));
   sh.setConditionalFormatRules(rules);
 
   /* --- Biểu đồ: data vào từng giai đoạn pipeline trong tháng vs đang ở giai đoạn --- */
@@ -1178,13 +1158,6 @@ function channelOf_(text, type) {
   return '';
 }
 
-function sampleOf_(text) {
-  const s = String(text).toLowerCase();
-  if (/gửi mẫu|gui mau|sending sample|send(ing)? (the )?sample/.test(s)) return 'Gửi';
-  if (/nhận mẫu|nhan mau|receiv(ed|ing)? (the )?sample/.test(s)) return 'Nhận';
-  return '';
-}
-
 function writeData_(rows) {
   const sh = SpreadsheetApp.getActive().getSheetByName(SH.DATA);
   const last = Math.max(sh.getLastRow(), 2);
@@ -1300,7 +1273,7 @@ function syncActivities() {
         if (keys.has(aid)) return;
         keys.add(aid);
         rows.push([aid, x.d, Utilities.formatDate(x.d, tz, 'HH:mm'), id, pick_(a, ['name', 'title']),
-          String(pick_(a, ['owner_id'])), 'Daily note', x.t, channelOf_(x.t, ''), sampleOf_(x.t)]);
+          String(pick_(a, ['owner_id'])), 'Daily note', x.t, channelOf_(x.t, '')]);
       });
       if (!(id in byAcc)) order.push(id);
       byAcc[id] = rows; scanned++; rowsOut += rows.length;
@@ -1403,49 +1376,4 @@ function debugAccount() {
     out += '\nKhóa trong data của account mẫu: ' + Object.keys(stripNull_(d) || {}).join(', ');
   } catch (err) { out += 'LỖI: ' + err.message; }
   SpreadsheetApp.getUi().alert(out);
-}
-
-/* ===================== DỮ LIỆU DEMO ===================== */
-function seedDemoData() {
-  const ss = SpreadsheetApp.getActive();
-  if (!ss.getSheetByName(SH.DATA)) setupAll();
-  const today = new Date(); today.setHours(9, 0, 0, 0);
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1, 9);
-  const ago = (n) => { const d = new Date(today); d.setDate(d.getDate() - n); return d < monthStart ? new Date(monthStart) : d; };
-  const owners = ['ferrie', 'sourcing_b', 'sourcing_c'];
-  const stages = ['Đã xác nhận', 'Đàm phán', 'Chờ xác nhận', 'Gửi mẫu', 'Đã xác nhận', 'Tiếp cận', 'Đàm phán', 'Thua', 'Chờ xác nhận', 'Nhận mẫu'];
-  const countries = ['China', 'India', 'Korea', 'Vietnam', 'Thailand', 'Taiwan'];
-  const ctypes = ['Manufacturer', 'Trader', 'Manufacturer', 'Agent'];
-  const prods = ['PVC Stabilizer', 'Calcium Stearate', 'PE Wax', 'ACR Modifier', 'CPE 135A', 'Zinc Stearate'];
-  const pot = ['High', 'Medium', 'Low'];
-  const notes = ['Đã gửi báo giá, chờ phản hồi từ supplier', 'Supplier đồng ý gửi mẫu cho khách hàng', 'Đang thương lượng giá FOB',
-    'Chờ kết quả test mẫu từ kỹ thuật', 'Đã chốt điều khoản thanh toán, chờ PO'];
-  const rows = [];
-  for (let i = 0; i < 26; i++) {
-    const stage = stages[i % stages.length];
-    const won = stage === 'Đã xác nhận';
-    rows.push(['S' + (2000 + i), i % 4 === 0 ? today : ago(i % 12 + 1), ago(i % 4), owners[i % 3],
-      'Supplier demo ' + ('0' + (i + 1)).slice(-2), i % 4 === 0 ? 'Có' : 'Không', countries[i % countries.length],
-      ctypes[i % ctypes.length], prods[i % prods.length], pot[i % 3], [10, 20, 15, 25, 40, 8][i % 6],
-      [12000, 25000, 18000, 32000, 50000, 9000][i % 6], 'SC-' + (100 + i), stage, notes[i % notes.length],
-      'Mr. Demo ' + (i + 1), won ? ago(i % 9) : '']);
-  }
-  writeData_(rows);
-
-  // Activity demo (đánh dấu ID bắt đầu bằng DEMO)
-  const a = ss.getSheetByName(SH.ACT);
-  const tz = ss.getSpreadsheetTimeZone();
-  const texts = ['Gửi email chào hàng cho supplier', 'Nhắn Zalo hỏi giá', 'Chat LinkedIn kết nối supplier mới',
-    'WhatsApp trao đổi MOQ', 'Gửi mẫu cho khách hàng', 'Nhận mẫu từ supplier', 'Gọi điện xác nhận lịch giao hàng', 'Email follow up báo giá'];
-  const acts = [];
-  for (let i = 0; i < 48; i++) {
-    const d = i % 3 === 0 ? new Date(today) : ago(i % 14);
-    d.setHours(8 + (i % 9), (i * 7) % 60, 0, 0);
-    const t = texts[i % texts.length];
-    acts.push(['DEMO' + (3000 + i), d, Utilities.formatDate(d, tz, 'HH:mm'), 'S' + (2000 + (i % 26)),
-      'Supplier demo ' + ('0' + ((i % 26) + 1)).slice(-2), owners[i % 3], i % 2 ? 'note' : 'call', t, channelOf_(t, ''), sampleOf_(t)]);
-  }
-  const lastA = Math.max(a.getLastRow(), 2);
-  a.getRange(2, 1, lastA - 1, ACT_HEADERS.length).clearContent();
-  a.getRange(2, 1, acts.length, ACT_HEADERS.length).setValues(acts);
 }
