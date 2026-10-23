@@ -514,25 +514,23 @@ function pipelineBlocks_(sh) {
   /* --- Data chuyển đổi theo ngày --- */
   const b2 = 24, h2 = 25;
   sectionBand_(sh, b2, 'DATA CHUYỂN GIAI ĐOẠN THEO NGÀY (ngày báo cáo ở ô C3, lọc theo nhân sự ở ô F3)');
-  sh.getRange(h2, 2, 1, 3).setValues([['Giai đoạn pipeline', 'Chuyển vào trong ngày', 'Chuyển ra khỏi giai đoạn trong ngày']]);
-  styleHeader_(sh.getRange(h2, 2, 1, 3), COLOR.blue, COLOR.navy);
+  sh.getRange(h2, 2, 1, 2).setValues([['Giai đoạn pipeline', 'Chuyển vào trong ngày']]);
+  styleHeader_(sh.getRange(h2, 2, 1, 2), COLOR.blue, COLOR.navy);
   sideLabel_(sh, h2, n + 2, 'Trong ngày');
   const day = g('A') + ',">="&$C$3,' + g('A') + ',"<"&$C$3+1,' + g('H') + ',$K$6';
   PIPELINE.forEach((s, i) => {
     const r = h2 + 1 + i;
     sh.getRange(r, 2).setValue(s).setFontWeight('bold');
     sh.getRange(r, 3).setFormula(fx_('=COUNTIFS(' + day + ',' + g('F') + ',$B' + r + noRen + ')'));
-    sh.getRange(r, 4).setFormula(fx_('=COUNTIFS(' + day + ',' + g('E') + ',$B' + r + ',' + g('K') + ',"Chuyển giai đoạn")'));
   });
   const t2 = h2 + n + 1;
   sh.getRange(t2, 2).setValue('TỔNG');
   sh.getRange(t2, 3).setFormula(fx_('=SUM(C' + (h2 + 1) + ':C' + (t2 - 1) + ')'));
-  sh.getRange(t2, 4).setFormula(fx_('=SUM(D' + (h2 + 1) + ':D' + (t2 - 1) + ')'));
-  sh.getRange(t2, 2, 1, 3).setBackground(COLOR.blue).setFontWeight('bold').setFontColor(COLOR.navy);
-  sh.getRange(h2 + 1, 3, n + 1, 2).setHorizontalAlignment('center').setNumberFormat('0');
-  border_(sh.getRange(h2, 2, n + 2, 3));
-  zebra_(sh, h2 + 1, n, 3);
-  sh.getRange(h2 + 1, 5, 4, 5).merge().setValue('Chuyển vào = data mới thêm hoặc vừa chuyển đến giai đoạn đó; Chuyển ra = data rời giai đoạn đó sang giai đoạn khác (không tính "Cập nhật tên"). Số liệu lấy từ nhật ký chuyển giai đoạn, ghi mỗi lần đồng bộ CRM.')
+  sh.getRange(t2, 2, 1, 2).setBackground(COLOR.blue).setFontWeight('bold').setFontColor(COLOR.navy);
+  sh.getRange(h2 + 1, 3, n + 1, 1).setHorizontalAlignment('center').setNumberFormat('0');
+  border_(sh.getRange(h2, 2, n + 2, 2));
+  zebra_(sh, h2 + 1, n, 2);
+  sh.getRange(h2 + 1, 4, 4, 5).merge().setValue('Chuyển vào = data mới thêm hoặc vừa chuyển đến giai đoạn đó (không tính "Cập nhật tên"). Số liệu lấy từ nhật ký chuyển giai đoạn, ghi mỗi lần đồng bộ CRM.')
     .setFontStyle('italic').setFontColor('#7f7f7f').setWrap(true).setVerticalAlignment('top');
 }
 
