@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lộ trình triển khai DHA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F9FAFB; --card:#FFFFFF; --ink:#111827; --text:#1F2937; --muted:#6B7280; --line:#E5E7EB;
+  --blue:#2563EB; --cyan:#0891B2; --amber:#F59E0B; --amber-bg:#FEF3C7; --green:#16A34A; --green-bg:#DCFCE7;
+  --pending-bg:#EEF2FF; --pending:#4338CA; --hero1:#051433; --hero2:#143478;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#030A1F; --card:#0A2152; --ink:#F4F8FF; --text:#D9E9FF; --muted:#9DB3DA; --line:rgba(127,180,255,.22);
+    --blue:#4F93FF; --cyan:#5EE7FF; --amber:#FFC46B; --amber-bg:rgba(255,196,107,.14); --green:#4ADE80; --green-bg:rgba(34,197,94,.16);
+    --pending-bg:rgba(127,180,255,.14); --pending:#B3D2FF;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#030A1F; --card:#0A2152; --ink:#F4F8FF; --text:#D9E9FF; --muted:#9DB3DA; --line:rgba(127,180,255,.22);
+  --blue:#4F93FF; --cyan:#5EE7FF; --amber:#FFC46B; --amber-bg:rgba(255,196,107,.14); --green:#4ADE80; --green-bg:rgba(34,197,94,.16);
+  --pending-bg:rgba(127,180,255,.14); --pending:#B3D2FF;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 Inter,"Segoe UI",system-ui,sans-serif}
+h1,h2,h3{font-family:Sora,Inter,system-ui,sans-serif;color:var(--ink);margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+header.hero{position:relative;overflow:hidden;color:#F4F8FF;
+  background:radial-gradient(circle at 0 0,rgba(47,123,255,.32),transparent 55%),linear-gradient(135deg,var(--hero1),var(--hero2));
+  padding:48px 0 40px}
+.eyebrow{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#7FB4FF;font-weight:600}
+.hero h1{color:#F4F8FF;font-size:clamp(28px,5vw,44px);line-height:1.15;margin:10px 0 8px}
+.hero h1 em{font-style:normal;color:#5EE7FF}
+.hero p{margin:0;color:#B3D2FF;max-width:720px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:28px}
+.kpi{background:rgba(255,255,255,.06);border:1px solid rgba(127,180,255,.22);border-radius:14px;padding:14px 16px}
+.kpi b{display:block;font-family:Sora,sans-serif;font-size:28px;color:#F4F8FF;line-height:1.2}
+.kpi b.cy{color:#5EE7FF} .kpi b.am{color:#FFC46B}
+.kpi span{font-size:13px;color:#9DB3DA}
+.progress{margin-top:22px;height:8px;border-radius:99px;background:rgba(127,180,255,.18);overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5EE7FF,#2F7BFF);border-radius:99px;transition:width 1.2s var(--ease)}
+main{padding:32px 0 48px}
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:18px}
+.sec-head h2{font-size:22px}
+.sec-head small{color:var(--muted)}
+.timeline{list-style:none;margin:0;padding:0;position:relative}
+.timeline::before{content:"";position:absolute;left:19px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.step{position:relative;padding-left:56px;margin-bottom:18px;opacity:0;transform:translateY(10px);animation:in .55s var(--ease) forwards}
+.dot{position:absolute;left:0;top:14px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  font:700 15px Sora,sans-serif;background:var(--card);border:2px solid var(--line);color:var(--muted)}
+.step.done .dot{background:var(--green);border-color:var(--green);color:#fff}
+.step.next .dot{border-color:var(--cyan);color:var(--cyan)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+.card-top{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.card h3{font-size:18px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0 12px;color:var(--muted);font-size:14px}
+.meta span::before{margin-right:6px}
+.tag{font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;white-space:nowrap}
+.tag.ok{background:var(--green-bg);color:var(--green)}
+.tag.wait{background:var(--pending-bg);color:var(--pending)}
+.flag{margin-top:10px;font-size:13px;background:var(--amber-bg);color:var(--ink);border-left:3px solid var(--amber);padding:6px 10px;border-radius:6px}
+.cols{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+@media (max-width:720px){.cols{grid-template-columns:1fr}}
+.block h4{margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.block ul{margin:0;padding-left:18px}
+.block li{margin:2px 0}
+.block .grp{font-weight:600;color:var(--ink);margin-top:6px}
+.block p{margin:0;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:13px;border:1px solid var(--line);border-radius:99px;padding:2px 10px}
+footer{border-top:1px solid var(--line);padding:18px 0 32px;color:var(--muted);font-size:13px}
+footer a{color:var(--blue)}
+.toggle{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.08);border:1px solid rgba(127,180,255,.3);color:#D9E9FF;border-radius:99px;padding:4px 12px;font:500 13px Inter,sans-serif;cursor:pointer}
+@keyframes in{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.step{animation:none;opacity:1;transform:none}.progress i{transition:none}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <button class="toggle" id="themeBtn" type="button">Sáng / Tối</button>
+  <div class="wrap">
+    <div class="eyebrow">DHA × Base.vn · Base CRM</div>
+    <h1>Lộ trình triển khai <em>Base CRM</em> cho DHA.</h1>
+    <p>5 buổi làm việc từ khảo sát đến review sau sử dụng. Dự kiến go-live chính thức ngày 20/10.</p>
+    <div class="kpis">
+      <div class="kpi"><b>5</b><span>Buổi triển khai</span></div>
+      <div class="kpi"><b class="cy">1/5</b><span>Buổi đã tổ chức</span></div>
+      <div class="kpi"><b class="am">20/10</b><span>Go-live dự kiến</span></div>
+      <div class="kpi"><b>Offline</b><span>Tại văn phòng DHA</span></div>
+    </div>
+    <div class="progress" aria-label="Tiến độ 1/5 buổi"><i id="bar"></i></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="sec-head">
+    <h2>Các buổi triển khai</h2>
+    <small>Nguồn: tab “5. Kế hoạch triển khai” · cập nhật 21/10/2026</small>
+  </div>
+  <ol class="timeline" id="tl"></ol>
+</main>
+
+<footer class="wrap">
+  Dữ liệu lấy từ Google Sheet “DHA | Khảo sát CRM + Lộ trình triển khai”. Trạng thái và thời gian giữ đúng như trong file; mục đánh dấu vàng là chỗ cần xác nhận lại.
+</footer>
+
+<script>
+const sessions = [
+  {
+    n: 1, title: "Khảo sát", time: "15h–17h30, Thứ 6, 16/10", form: "Offline tại VP", status: "Đã tổ chức",
+    content: [
+      { items: [
+        "Khảo sát quy trình, cách thức bán hàng",
+        "Khảo sát cách thức phân phối sales, thực hiện tư vấn bán hàng",
+        "Khảo sát nhu cầu báo cáo",
+        "Khởi tạo hệ thống & tài khoản. Phân quyền quản trị tài khoản",
+        "Tích hợp tài khoản email, số điện thoại cá nhân",
+        "Khảo sát cách thức giao việc"
+      ]}
+    ],
+    people: ["PIC CRM", "Key Sales"],
+    prep: ["Danh sách tài khoản sử dụng Base CRM", "Danh sách khách hàng & cấu trúc dữ liệu cần quản lý", "Danh sách liên hệ"]
+  },
+  {
+    n: 2, title: "Review giải pháp thiết lập hệ thống", time: "Dự kiến 15h–17h, Thứ 3, 20/10", form: "Offline tại VP", status: "Chưa tổ chức",
+    flag: "Đã qua ngày dự kiến (20/10) nhưng file vẫn ghi “Chưa tổ chức”. Cần xác nhận buổi đã diễn ra hay dời lịch, và mốc go-live 20/10.",
+    content: [
+      { group: "1. Platform", items: ["Khởi tạo hệ thống & tài khoản. Phân quyền quản trị tài khoản", "Tích hợp tài khoản email, số điện thoại cá nhân"] },
+      { group: "2. Phân hệ Sales / Prospector", items: ["Thiết lập quy trình bán hàng theo nội dung đã khảo sát", "Xây dựng mẫu báo cáo dựa trên các dữ liệu của hệ thống"] },
+      { group: "3. Automation", items: ["Hướng dẫn xây dựng cơ chế Automation"] }
+    ],
+    people: ["Đội ngũ kinh doanh", "PID", "BGĐ"],
+    prep: ["Hệ thống đã có dữ liệu về khách hàng, liên hệ thực tế", "Các deal thương vụ mẫu", "Phòng họp + máy chiếu", "Tải app Base CRM"]
+  },
+  {
+    n: 3, title: "Đào tạo đội ngũ", time: "Dự kiến 15h–17h, Thứ 2, 27/10", form: "Offline tại VP", status: "Chưa tổ chức",
+    content: [{ group: "4. Đào tạo đội ngũ", items: ["Tổ chức đào tạo thao tác sử dụng CRM cho bộ phận MKT + Sales"] }],
+    people: [], prep: []
+  },
+  {
+    n: 4, title: "Bàn giao và hướng dẫn chi tiết thiết lập", time: "Thống nhất sau", form: "Offline tại VP", status: "Chưa tổ chức",
+    content: [{ items: ["Bàn giao và hướng dẫn chi tiết thiết lập"] }], people: [], prep: []
+  },
+  {
+    n: 5, title: "Review sau sử dụng hệ thống", time: "Thống nhất sau", form: "Offline tại VP", status: "Chưa tổ chức",
+    content: [{ items: ["Review sau sử dụng hệ thống"] }], people: [], prep: []
+  }
+];
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const firstOpen = sessions.find(s => s.status !== "Đã tổ chức");
+document.getElementById("tl").innerHTML = sessions.map((s, i) => {
+  const done = s.status === "Đã tổ chức";
+  const cls = done ? "done" : (s === firstOpen ? "next" : "");
+  const content = s.content.map(g =>
+    (g.group ? `<div class="grp">${esc(g.group)}</div>` : "") +
+    `<ul>${g.items.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`).join("");
+  const people = s.people.length
+    ? `<div class="chips">${s.people.map(p => `<span class="chip">${esc(p)}</span>`).join("")}</div>`
+    : `<p>Chưa xác định</p>`;
+  const prep = s.prep.length
+    ? `<ul>${s.prep.map(p => `<li>${esc(p)}</li>`).join("")}</ul>`
+    : `<p>Chưa xác định</p>`;
+  return `<li class="step ${cls}" style="animation-delay:${i * 80}ms">
+    <div class="dot">${done ? "✓" : s.n}</div>
+    <div class="card">
+      <div class="card-top">
+        <h3>Buổi ${s.n} · ${esc(s.title)}</h3>
+        <span class="tag ${done ? "ok" : "wait"}">${esc(s.status)}</span>
+      </div>
+      <div class="meta"><span>🕒 ${esc(s.time)}</span><span>📍 ${esc(s.form)}</span></div>
+      <div class="cols">
+        <div class="block"><h4>Nội dung triển khai</h4>${content}</div>
+        <div class="block">
+          <h4>Thành phần tham dự</h4>${people}
+          <h4 style="margin-top:12px">Chuẩn bị</h4>${prep}
+        </div>
+      </div>
+      ${s.flag ? `<div class="flag">⚠️ ${esc(s.flag)}</div>` : ""}
+    </div>
+  </li>`;
+}).join("");
+
+const doneCount = sessions.filter(s => s.status === "Đã tổ chức").length;
+requestAnimationFrame(() => { document.getElementById("bar").style.width = (doneCount / sessions.length * 100) + "%"; });
+
+const root = document.documentElement;
+try { const t = localStorage.getItem("dha-theme"); if (t) root.dataset.theme = t; } catch (e) {}
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("dha-theme", root.dataset.theme); } catch (e) {}
+});
+</script>
+</body>
+</html>
