@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/tong-quan", "destination": "/index.html" },
+    { "source": "/cong-viec", "destination": "/index.html" },
+    { "source": "/cong-viec/:id", "destination": "/index.html" }
+  ]
+}

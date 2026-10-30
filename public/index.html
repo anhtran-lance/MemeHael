@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang='vi'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>WBS triển khai CRM</title>
+<meta name='description' content='WBS dự án triển khai CRM cho công ty phân phối 10 sale: tổng quan chỉ số và phạm vi từng công việc.'>
+<link rel='preconnect' href='https://fonts.googleapis.com'>
+<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+<link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap' rel='stylesheet'>
+<style>
+:root{
+  --ink:#0F172A; --ink2:#475569; --ink3:#94A3B8; --line:#E2E8F0; --line2:#CBD5E1; --subtle:#F7F9FC;
+  --primary:#1F62E8; --primary-h:#0F4FD6; --tint:#EAF1FC; --soft:#CFE3FF; --night:#0B0F19;
+  --done:#16A34A; --wait:#FFB300; --bad:#DC2626;
+  --grad:linear-gradient(113deg,#245BFF 0%,#00B8D9 48%,#7C3AED 100%);
+  --sh1:0 1px 2px rgba(12,20,46,.05); --sh2:0 1px 2px rgba(12,20,46,.05),0 12px 28px -16px rgba(12,20,46,.3);
+}
+*{box-sizing:border-box}
+html{color-scheme:light;scroll-behavior:smooth}
+body{margin:0;background:#fff;color:#1C1F27;font:15px/1.6 Inter,ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,h4{color:var(--ink);letter-spacing:-.02em;margin:0}
+button,select,input,textarea{font:inherit;color:inherit}
+.container{max-width:1280px;margin:0 auto;padding:0 24px}
+
+/* header */
+.top{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .container{display:flex;align-items:center;gap:16px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--ink);letter-spacing:-.01em;white-space:nowrap}
+.logo{width:26px;height:26px;border-radius:8px;background:var(--grad)}
+.brand small{color:var(--ink3);font-weight:500;font-size:13px}
+.nav{display:flex;gap:4px;margin-left:8px}
+.nav a{padding:8px 16px;border-radius:999px;font-weight:600;font-size:14px;color:var(--ink2)}
+.nav a:hover{background:var(--subtle)}
+.nav a.on{background:var(--tint);color:var(--primary)}
+.sp{flex:1}
+.pbtn{border-radius:999px;padding:9px 18px;font-weight:600;font-size:14px;border:1px solid var(--line2);background:#fff;cursor:pointer;color:var(--ink);white-space:nowrap;display:inline-block}
+.pbtn:hover{border-color:var(--ink3)}
+.pbtn.dark{background:var(--night);border-color:var(--night);color:#fff}
+.pbtn.dark:hover{background:#1c2333}
+.pbtn.sm{padding:5px 12px;font-size:12px}
+.pbtn.danger{color:var(--bad)}
+.rolebadge{font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;background:var(--subtle);border:1px solid var(--line);color:var(--ink2);white-space:nowrap}
+.rolebadge.editor{background:var(--tint);color:var(--primary);border-color:var(--soft)}
+.rolebadge.admin{background:var(--night);color:#fff;border-color:var(--night)}
+
+.offline{background:#FEF3C7;color:#92400E;border-bottom:1px solid #FDE68A;padding:10px 0;font-size:14px;font-weight:500}
+
+/* hero */
+.hero{padding:44px 0 8px;background:radial-gradient(900px 340px at 85% -20%,#EAF1FC 0,rgba(234,241,252,0) 70%)}
+.hero-in{display:grid;grid-template-columns:1.35fr 1fr;gap:32px;align-items:start}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--primary)}
+h1{font-size:40px;line-height:1.15;font-weight:700;margin:10px 0 14px;letter-spacing:-.03em}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:16px;color:var(--ink2);max-width:60ch;margin:0 0 20px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.chip-soft{background:var(--tint);color:var(--primary);font-weight:600;font-size:13px;padding:7px 14px;border-radius:999px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--sh1)}
+.card h3{font-size:17px;font-weight:700;margin-bottom:4px}
+.card .hint{color:var(--ink2);font-size:13px;margin:0 0 14px}
+.facts{display:grid;gap:14px}
+.fact small{display:block;color:var(--ink3);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.fact b{font-size:15px;color:var(--ink)}
+.people-mini{display:flex;flex-direction:column;gap:10px}
+.pm-row{display:flex;align-items:center;gap:10px}
+.av{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex:none}
+.av.s{width:24px;height:24px;font-size:10px}
+
+/* page */
+.page{padding:24px 24px 72px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px}
+.kpi{padding:16px 18px}
+.kpi small{display:block;color:var(--ink2);font-size:13px;font-weight:500}
+.kpi b{display:block;font-size:30px;line-height:1.2;font-weight:700;letter-spacing:-.03em;color:var(--ink);margin:2px 0}
+.kpi span{color:var(--ink3);font-size:12px}
+.kpi.warn b{color:var(--bad)}
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-bottom:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
+.stack{display:flex;height:10px;border-radius:99px;overflow:hidden;background:#EEF2F7}
+.stack i{display:block;height:100%}
+.row-s{padding:12px 0;border-bottom:1px solid var(--line)}
+.row-s:last-child{border-bottom:0;padding-bottom:0}
+.row-s:first-child{padding-top:0}
+.rs-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.dotc{width:10px;height:10px;border-radius:50%;flex:none}
+.rs-top b{font-weight:600;color:var(--ink)}
+.rs-top .r{margin-left:auto;font-weight:700;color:var(--ink)}
+.rs-sub{display:flex;gap:12px;flex-wrap:wrap;color:var(--ink2);font-size:12px;margin-top:6px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-top:12px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.person{display:flex;flex-direction:column;gap:10px}
+.person .pt{display:flex;align-items:center;gap:12px}
+.person .pt b{display:block;color:var(--ink)}
+.person .pt small{color:var(--ink2)}
+.person .area{color:var(--ink2);font-size:13px}
+.nums{display:flex;gap:16px;font-size:13px;color:var(--ink2)}
+.nums b{color:var(--ink);font-size:18px;display:block;line-height:1.2}
+.next{font-size:12px;color:var(--ink2);border-top:1px solid var(--line);padding-top:10px}
+.next a{display:block;padding:2px 0;color:var(--ink)}
+.next a:hover{color:var(--primary)}
+table.cov{width:100%;border-collapse:collapse}
+table.cov th{font-size:12px;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;text-align:center;padding:6px 8px;font-weight:600}
+table.cov th:first-child,table.cov td:first-child{text-align:left}
+table.cov td{padding:8px;border-top:1px solid var(--line);text-align:center}
+table.cov td:first-child{font-weight:600;color:var(--ink)}
+.cell{display:inline-block;min-width:54px;padding:3px 10px;border-radius:8px;font-weight:600;font-size:13px}
+.load{display:flex;align-items:flex-end;gap:10px;height:140px;margin:6px 0 8px}
+.lcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}
+.lbar{width:100%;max-width:56px;border-radius:8px 8px 4px 4px;background:var(--soft);position:relative;min-height:4px}
+.lbar.today{background:var(--primary)}
+.lbar span{position:absolute;top:-20px;left:0;right:0;text-align:center;font-size:12px;font-weight:600;color:var(--ink)}
+.ldays{display:flex;gap:10px}
+.ldays div{flex:1;text-align:center;font-size:12px;color:var(--ink2)}
+.ldays div.today{color:var(--primary);font-weight:700}
+.ldays div.dl{color:var(--bad);font-weight:700}
+.msl{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.ms{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;background:var(--subtle)}
+.ms b{display:block;color:var(--ink)}
+.ms.done{background:#F0FDF4;border-color:#BBF7D0}
+.att a{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.att a:first-child{border-top:0}
+.att a:hover .an{color:var(--primary)}
+.att .an{font-weight:500;color:var(--ink);flex:1;min-width:0}
+.att small{color:var(--ink2);white-space:nowrap}
+.tag{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.sp-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.sp-pill i{width:7px;height:7px;border-radius:50%;display:inline-block}
+
+
+/* tasks page */
+.ph-head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.ph-head h2{font-size:30px;font-weight:700;letter-spacing:-.03em}
+.ph-head p{margin:2px 0 0;color:var(--ink2)}
+.seg{display:inline-flex;background:var(--subtle);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;margin-bottom:12px}
+.seg button{border:0;background:transparent;padding:7px 16px;border-radius:999px;font-weight:600;font-size:13px;color:var(--ink2);cursor:pointer}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:var(--sh1)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filters select,.filters input{padding:8px 12px;border:1px solid var(--line2);border-radius:999px;background:#fff;font-size:13px}
+.filters input{min-width:200px}
+.sync{margin-left:auto;color:var(--ink3);font-size:12px}
+.tbox{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+.tscroll{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;min-width:980px}
+table.t th{background:var(--subtle);font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);text-align:left;padding:10px 14px;font-weight:600;border-bottom:1px solid var(--line);white-space:nowrap}
+table.t td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.ph td{background:#fff;padding:16px 14px 12px;border-bottom:1px solid var(--line2)}
+tr.ph .phn{display:flex;align-items:center;gap:10px}
+tr.ph .phn b{font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.02em}
+tr.gp td{background:var(--subtle);font-weight:600;color:var(--ink);padding:9px 14px}
+tr.tk{cursor:pointer}
+tr.tk:hover td{background:#F8FAFF}
+tr.tk.sel td{background:var(--tint)}
+tr.tk.mile td:first-child{box-shadow:inset 3px 0 0 var(--wait)}
+.tg{cursor:pointer;display:inline-block;width:18px;color:var(--ink3);user-select:none}
+.code{font-weight:600;color:var(--ink3);font-size:13px;white-space:nowrap}
+.tn{font-weight:600;color:var(--ink);letter-spacing:-.01em}
+.ts{color:var(--ink2);font-size:13px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.own{display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:14px}
+.tm{white-space:nowrap;font-size:13px;color:var(--ink)}
+.dd{display:flex;gap:2px;margin-top:6px}
+.dd i{width:12px;height:5px;border-radius:2px;background:#E8EDF4}
+.dl-t{color:var(--ink2);font-size:13px}
+td select,td input{padding:5px 10px;border:1px solid var(--line2);border-radius:999px;background:#fff;font-size:13px;max-width:100%}
+.mini{display:inline-block;width:80px;height:6px;border-radius:99px;background:#E8EDF4;vertical-align:middle;overflow:hidden;margin:0 8px 0 4px}
+.mini i{display:block;height:100%;background:var(--done)}
+.pcount{color:var(--ink2);font-size:13px;font-weight:500}
+.matrix{display:grid;grid-template-columns:180px repeat(var(--n,3),minmax(160px,1fr));gap:10px;overflow-x:auto}
+.mh{padding:10px 14px;border-radius:12px;font-weight:700;color:#fff;font-size:14px}
+.mt{padding:12px 14px;border-radius:12px;background:var(--subtle);border:1px solid var(--line);font-weight:700;color:var(--ink)}
+.mt small{display:block;font-weight:500;color:var(--ink2)}
+.mc{padding:8px;border-radius:12px;border:1px solid var(--line);display:flex;flex-direction:column;gap:6px;background:#fff}
+a.mi{display:block;font-size:13px;border-left:3px solid var(--c);padding:6px 8px;border-radius:6px;background:var(--subtle)}
+a.mi:hover{background:var(--tint)}
+a.mi small{display:block;color:var(--ink2)}
+.hist div{padding:12px 18px;border-bottom:1px solid var(--line)}
+.hist div:last-child{border:0}
+.hist small{color:var(--ink3)}
+.empty{padding:28px;color:var(--ink2);text-align:center}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,15,30,.38);z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);background:#fff;z-index:41;box-shadow:-24px 0 60px -30px rgba(12,20,46,.5);overflow-y:auto;display:flex;flex-direction:column}
+.dr-head{padding:20px 24px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2}
+.dr-head .x{float:right}
+.dr-head h3{font-size:20px;line-height:1.3;margin-top:8px}
+.dr-body{padding:6px 24px 32px}
+.dsec{padding:14px 0;border-bottom:1px solid var(--line)}
+.dsec:last-child{border-bottom:0}
+.dsec h5{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);font-weight:700}
+.dsec p{margin:0;color:var(--ink);font-size:14px}
+.dsec textarea,.dsec input[type=text],.dsec input:not([type]){width:100%;padding:8px 12px;border:1px solid var(--line2);border-radius:10px;font-size:14px}
+.dsec textarea{min-height:76px;resize:vertical}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgrid label{display:block;font-size:12px;color:var(--ink3);font-weight:600;margin-bottom:4px}
+.fgrid select,.fgrid input{width:100%;padding:8px 12px;border:1px solid var(--line2);border-radius:10px;background:#fff;font-size:14px}
+.fgrid .ro{padding:8px 0;font-size:14px;color:var(--ink);font-weight:500}
+.deps a{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;font-size:13px;background:var(--subtle)}
+.deps a:hover{background:var(--tint)}
+.deps a span{flex:1;min-width:0;color:var(--ink)}
+.deps a small{color:var(--ink2);white-space:nowrap}
+
+/* modal + toast */
+.modal{position:fixed;inset:0;background:rgba(10,15,30,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.modal form{background:#fff;border-radius:20px;padding:26px;width:min(400px,100%);box-shadow:var(--sh2)}
+.modal h3{font-size:20px;margin-bottom:4px}
+.modal label{display:block;font-weight:600;font-size:13px;margin:14px 0 4px;color:var(--ink)}
+.modal input{width:100%;padding:11px 14px;border:1px solid var(--line2);border-radius:12px}
+.modal .row{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.err{color:var(--bad);font-size:13px;margin-top:8px;min-height:18px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--night);color:#fff;padding:11px 18px;border-radius:999px;z-index:70;max-width:90vw;font-size:14px}
+.foot{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--ink3);font-size:13px;background:var(--subtle)}
+
+@media(max-width:1080px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2,.grid3,.hero-in{grid-template-columns:1fr}.msl{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){h1{font-size:30px}.kpis{grid-template-columns:1fr 1fr}.matrix{grid-template-columns:180px repeat(var(--n,3),240px)}.container{padding:0 16px}.page{padding:20px 16px 56px}.brand small{display:none}.nav a{padding:8px 12px}.top .container{gap:8px}}
+</style>
+</head>
+<body>
+<div id='app'></div>
+<script>
+const ST = {
+  todo:{l:'Chưa bắt đầu', bg:'#F1F5F9', fg:'#475569', c:'#CBD5E1'},
+  doing:{l:'Đang thực hiện', bg:'#EAF1FC', fg:'#1F62E8', c:'#1F62E8'},
+  done:{l:'Hoàn thành', bg:'#DCFCE7', fg:'#15803D', c:'#16A34A'},
+  hold:{l:'Tạm hoãn', bg:'#FEF3C7', fg:'#B45309', c:'#FFB300'},
+};
+const APP = {
+  Lead:{bg:'#EAF1FC', fg:'#1F62E8'}, Sales:{bg:'#E0F7FA', fg:'#0E7490'}, Automation:{bg:'#FEF3C7', fg:'#B45309'},
+  Prospect:{bg:'#FCE7F3', fg:'#BE185D'}, Platform:{bg:'#F3E8FF', fg:'#7C3AED'}, Chung:{bg:'#F1F5F9', fg:'#475569'},
+};
+const STREAM = {'0':'#64748B', '1':'#1F62E8', '2':'#7C3AED', '3':'#0891B2'};
+const PHASE_ORDER = ['0','1','2','3'];
+const THEMES = {
+  '0':'Điều phối dự án', A:'Nền tảng và tài khoản', B:'Lead và Prospect', C:'Phân phối và SLA', D:'Sales: pipeline và khách',
+  E:'Automation', F:'Dữ liệu mẫu và báo cáo', G:'Tài liệu', H:'Trình bày: demo và QA',
+};
+const THEME_KEYS = ['A','B','C','D','E','F','G','H'];
+const THEME_DESC = {
+  '0':'Phạm vi, mốc, khảo sát', A:'Account, setting, workforce, phân quyền', B:'Nguồn lead, live chat, Zalo, AI Agent', C:'Phân công, phân phối data, cảnh báo',
+  D:'Pipeline, Account, Contact', E:'Tự động hóa giữa các app', F:'Dữ liệu mẫu, dashboard', G:'SD, HDSD, hand-off, lộ trình', H:'Demo, QA, bộ nộp',
+};
+const PRIORITY = ['Cao','Trung bình','Thấp'];
+const ROLES = ['PM','PE'];
+const APPS = ['Lead','Sales','Automation','Prospect','Platform','Chung'];
+const DOW = ['CN','T2','T3','T4','T5','T6','T7'];
+const AV_COLORS = ['#1F62E8','#7C3AED','#0891B2','#16A34A','#D97706'];
+
+let S = { data:null, role:'viewer', page:'tong-quan', openId:null, sub:'list', f:{luong:'', nguoi:'', tt:'', chude:'', q:''}, collapsed:{}, busy:false, saved:'', offline:false };
+let auth = { name:'', code:'' };
+try { auth = JSON.parse(localStorage.getItem('wbs-auth') || 'null') || auth; } catch(e) {}
+try { S.collapsed = JSON.parse(localStorage.getItem('wbs-collapsed') || 'null') || {}; } catch(e) {}
+
+const $ = (s, r) => (r || document).querySelector(s);
+const QUOT = String.fromCharCode(34), APOS = String.fromCharCode(39);
+const esc = v => String(v == null ? '' : v).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split(QUOT).join('&quot;').split(APOS).join('&#39;');
+const canEdit = () => S.role !== 'viewer' && !S.offline;
+const isAdmin = () => S.role === 'admin' && !S.offline;
+const pad = n => String(n).padStart(2, '0');
+const toIso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const todayIso = () => toIso(new Date());
+const fmt = iso => iso ? iso.slice(8) + '/' + iso.slice(5, 7) : '';
+const fmtFull = iso => iso ? fmt(iso) + '/' + iso.slice(0, 4) : '';
+const optList = (list, cur, label) => list.map(v => `<option value='${esc(v)}' ${v === cur ? 'selected' : ''}>${esc(label ? label(v) : v)}</option>`).join('');
+const initials = name => String(name || '?').trim().split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase();
+function avColor(name) { let h = 0; String(name).split('').forEach(c => { h = (h * 31 + c.charCodeAt(0)) % 997; }); return AV_COLORS[h % AV_COLORS.length]; }
+const av = (name, small) => name ? `<span class='av ${small ? 's' : ''}' style='background:${avColor(name)}'>${esc(initials(name))}</span>` : '';
+const statusPill = s => `<span class='sp-pill' style='background:${ST[s].bg};color:${ST[s].fg}'><i style='background:${ST[s].c}'></i>${ST[s].l}</span>`;
+const appTag = a => `<span class='tag' style='background:${(APP[a] || APP.Chung).bg};color:${(APP[a] || APP.Chung).fg}'>${esc(a)}</span>`;
+
+// ---------- dữ liệu
+const nodes = () => S.data.nodes;
+const tasks = () => nodes().filter(n => n.type === 'task');
+const tasksOf = node => tasks().filter(t => t.id.startsWith(node.id + '.'));
+const nodeById = id => nodes().find(n => n.id === id);
+const phaseId = id => id.split('.')[0];
+const phases = () => nodes().filter(n => n.type === 'phase').sort((a, b) => PHASE_ORDER.indexOf(a.id) - PHASE_ORDER.indexOf(b.id));
+function team() {
+  const m = S.data.meta, set = [];
+  [m.pm, m.peSales, m.peLead].concat(tasks().map(t => t.owner)).forEach(x => { if (x && !set.includes(x)) set.push(x); });
+  return set;
+}
+function orderedNodes() {
+  const out = [];
+  phases().forEach(p => nodes().forEach(n => { if (n.id === p.id || n.id.startsWith(p.id + '.')) out.push(n); }));
+  return out;
+}
+function roll(list) {
+  const c = {todo:0, doing:0, done:0, hold:0};
+  list.forEach(t => { c[t.status] = (c[t.status] || 0) + 1; });
+  const n = list.length;
+  return {n, c, pct: n ? Math.round(c.done * 100 / n) : 0};
+}
+function stackBar(r) {
+  const n = r.n || 1;
+  return `<div class='stack'>${['done','doing','hold'].map(k => `<i style='width:${r.c[k] * 100 / n}%;background:${ST[k].c}'></i>`).join('')}</div>`;
+}
+function range(list) {
+  if (!list.length) return '';
+  const s = list.map(t => t.start).sort()[0], e = list.map(t => t.end).sort().reverse()[0];
+  return fmt(s) + ' → ' + fmt(e);
+}
+function passF(t) {
+  const f = S.f, q = f.q.trim().toLowerCase();
+  return (!f.luong || phaseId(t.id) === f.luong) && (!f.nguoi || t.owner === f.nguoi) && (!f.tt || t.status === f.tt) &&
+    (!f.chude || t.theme === f.chude) && (!q || [t.id, t.name, t.scope, t.deliverable, t.owner, t.note, t.accept].join(' ').toLowerCase().includes(q));
+}
+const filtering = () => { const f = S.f; return !!(f.luong || f.nguoi || f.tt || f.chude || f.q.trim()); };
+const hiddenByCollapse = n => Object.keys(S.collapsed).some(c => S.collapsed[c] && n.id.startsWith(c + '.'));
+function daysLeft() {
+  const a = new Date(todayIso() + 'T00:00:00'), b = new Date(S.data.meta.deadline + 'T00:00:00');
+  return Math.round((b - a) / 864e5);
+}
+function dayList() {
+  const m = S.data.meta, out = [], d = new Date(m.start + 'T00:00:00'), end = new Date(m.deadline + 'T00:00:00');
+  for (let i = 0; i < 14 && d <= end; i++) { out.push({iso: toIso(d), dow: DOW[d.getDay()], day: pad(d.getDate())}); d.setDate(d.getDate() + 1); }
+  return out;
+}
+
+// ---------- định tuyến (đường link dạng slug, như base.vn)
+function readRoute() {
+  let p = location.pathname;
+  while (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
+  if (p === '/cong-viec' || p.indexOf('/cong-viec/') === 0) {
+    S.page = 'cong-viec';
+    const id = decodeURIComponent(p.slice('/cong-viec/'.length));
+    S.openId = id && p.length > '/cong-viec'.length ? id : null;
+  } else {
+    S.page = 'tong-quan'; S.openId = null;
+  }
+  const q = new URLSearchParams(location.search);
+  S.f = {luong: q.get('luong') || '', nguoi: q.get('nguoi') || '', tt: q.get('tt') || '', chude: q.get('chude') || '', q: q.get('q') || ''};
+  S.sub = q.get('xem') || 'list';
+  if (p === '/' || p === '') history.replaceState(null, '', '/tong-quan');
+}
+function queryString() {
+  const q = new URLSearchParams();
+  Object.keys(S.f).forEach(k => { if (S.f[k]) q.set(k, S.f[k]); });
+  if (S.sub !== 'list') q.set('xem', S.sub);
+  const s = q.toString();
+  return s ? '?' + s : '';
+}
+function go(url, replace) {
+  if (replace) history.replaceState(null, '', url); else history.pushState(null, '', url);
+  const prev = S.page + ':' + S.openId;
+  readRoute(); render();
+  if (!replace && S.page + ':' + S.openId !== prev && !S.openId) window.scrollTo(0, 0);
+}
+const taskUrl = id => '/cong-viec/' + encodeURIComponent(id) + queryString();
+function syncUrl() { history.replaceState(null, '', (S.openId ? '/cong-viec/' + encodeURIComponent(S.openId) : '/cong-viec') + queryString()); }
+
+// ---------- gọi API
+async function api(method, body) {
+  const headers = {'Content-Type':'application/json'};
+  if (auth.code) headers['x-access-code'] = auth.code;
+  const r = await fetch('/api/wbs', {method, headers, body: body ? JSON.stringify(body) : undefined, cache:'no-store'});
+  const j = await r.json().catch(() => ({error:'Phản hồi không hợp lệ'}));
+  if (!r.ok) throw new Error(j.error || ('Lỗi ' + r.status));
+  return j;
+}
+function apply(j) {
+  S.data = j.data; S.role = j.role;
+  S.saved = new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+}
+async function load(silent) {
+  try {
+    const j = await api('GET');
+    if (j.badCode) { auth.code = ''; persist(); toast('Mã truy cập không còn hiệu lực, đã chuyển về chế độ xem'); }
+    S.offline = false;
+    apply(j); render();
+  } catch (e) {
+    if (S.data) { if (!silent) toast(e.message); return; }
+    try {
+      const r = await fetch('/snapshot.json', {cache:'no-store'});
+      if (!r.ok) throw new Error('snapshot ' + r.status);
+      S.data = await r.json(); S.role = 'viewer'; S.offline = true; render();
+    } catch (e2) {
+      $('#app').innerHTML = `<div class='empty'>Không tải được dữ liệu: ${esc(e.message)}</div>`;
+    }
+  }
+}
+async function mutate(payload) {
+  S.busy = true; setSync();
+  try { apply(await api('POST', Object.assign({by: auth.name}, payload))); }
+  catch (e) { toast(e.message); await load(true); }
+  S.busy = false; render();
+}
+function persist() { try { localStorage.setItem('wbs-auth', JSON.stringify(auth)); } catch(e) {} }
+function persistCollapsed() { try { localStorage.setItem('wbs-collapsed', JSON.stringify(S.collapsed)); } catch(e) {} }
+function toast(m) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 4000); }
+function setSync() { const el = $('#sync'); if (el) el.textContent = S.busy ? 'Đang lưu…' : (S.saved ? 'Đã lưu lúc ' + S.saved : ''); }
+
+// ---------- khung trang
+function shell(inner) {
+  const roleLabel = {viewer:'Chỉ xem', editor:'Biên tập', admin:'Quản trị'}[S.role];
+  return `<header class='top'><div class='container'>
+    <a class='brand' data-link href='/tong-quan'><span class='logo'></span><span>WBS CRM <small>· Đề 1</small></span></a>
+    <nav class='nav'>
+      <a data-link href='/tong-quan' class='${S.page === 'tong-quan' ? 'on' : ''}'>Tổng quan</a>
+      <a data-link href='/cong-viec' class='${S.page === 'cong-viec' ? 'on' : ''}'>Công việc</a>
+    </nav>
+    <span class='sp'></span>
+    <span class='rolebadge ${S.role}'>${roleLabel}${canEdit() && auth.name ? ' · ' + esc(auth.name) : ''}</span>
+    ${S.offline ? '' : S.role !== 'viewer' ? `<button class='pbtn' id='logout'>Thoát chỉnh sửa</button>` : `<button class='pbtn dark' id='login'>Đăng nhập chỉnh sửa</button>`}
+  </div></header>
+  ${S.offline ? `<div class='offline'><div class='container'>Kho lưu trữ dữ liệu đang tạm ngưng nên trang hiển thị bản lưu lúc ${esc(new Date(S.data.updatedAt).toLocaleString('vi-VN'))} (chỉ xem, chưa chỉnh sửa được). Khi kho lưu trữ hoạt động lại, trang tự cập nhật.</div></div>` : ''}
+  ${inner}
+  <footer class='foot'><div class='container'>WBS dự án triển khai CRM cho công ty phân phối 10 sale · Hạn nộp sáng ${fmtFull(S.data.meta.deadline)} · Dữ liệu tự lưu khi chỉnh sửa, xem lịch sử tại Công việc → Nhật ký.</div></footer>`;
+}
+
+// ---------- TAB 1: TỔNG QUAN (chỉ số)
+function overview() {
+  const m = S.data.meta, T = tasks(), n = T.length, r = roll(T), today = todayIso();
+  const late = T.filter(t => t.end < today && t.status !== 'done');
+  const dueCount = T.filter(t => t.end <= today).length;
+  const planned = n ? Math.round(dueCount * 100 / n) : 0;
+  const ms = T.filter(t => t.milestone).sort((a, b) => a.end.localeCompare(b.end));
+  const dl = daysLeft();
+  const ph = phases(), main = ph.filter(p => p.id !== '0');
+  const appsOf = name => { const c = {}; T.filter(t => t.owner === name).forEach(t => { c[t.solution] = (c[t.solution] || 0) + 1; }); return Object.keys(c).sort((a, b) => c[b] - c[a]).map(k => k + ' ' + c[k]).join(' · ') || 'Chưa có việc'; };
+  const people = [
+    {name: m.pm, role: 'PM', area: 'Điều phối, mốc kiểm soát, kiểm thử 4 kịch bản, khung lộ trình và go-live'},
+    {name: m.peSales, role: 'PE · Base Sales', area: 'Pipeline, hồ sơ khách, cảnh báo deal, dashboard dự báo; thiết kế và lộ trình phần Sales'},
+    {name: m.peLead, role: 'PE · Base Lead', area: 'Nguồn lead, chia lead, SLA; nền tảng, phân quyền; thiết kế và lộ trình phần Lead'},
+  ];
+  const ds = dayList(), load = ds.map(d => T.filter(t => t.start <= d.iso && t.end >= d.iso).length), maxLoad = Math.max.apply(null, load.concat([1]));
+  const attention = late.concat(T.filter(t => t.status === 'hold' && !late.includes(t))).sort((a, b) => a.end.localeCompare(b.end));
+  const cov = (th, p) => {
+    const l = T.filter(t => t.theme === th && phaseId(t.id) === p), x = roll(l);
+    if (!l.length) return `<span class='cell' style='color:#CBD5E1'>—</span>`;
+    const st = x.c.done === x.n ? 'done' : (x.c.doing || x.c.done) ? 'doing' : 'todo';
+    return `<a data-link href='/cong-viec?luong=${p}&chude=${th}' class='cell' style='background:${ST[st].bg};color:${ST[st].fg}'>${x.c.done}/${x.n}</a>`;
+  };
+  return shell(`
+  <section class='hero'><div class='container hero-in'>
+    <div>
+      <div class='eyebrow'>Hội thảo Base 2.0 · Đề 1 · WBS dự án</div>
+      <h1>Triển khai <span class='grad'>CRM</span> cho công ty phân phối 10 sale</h1>
+      <p class='lead'>Dự án chia thành ${ph.length} nhóm công việc: ${ph.map(p => esc(p.name)).join(', ')}. Tab này tổng hợp chỉ số; phạm vi, thành phẩm, tiêu chí hoàn thành và phụ thuộc của từng việc nằm ở tab Công việc.</p>
+      <div class='cta'><a class='pbtn dark' data-link href='/cong-viec'>Xem công việc →</a><span class='chip-soft'>Hạn nộp sáng ${fmtFull(m.deadline)}</span></div>
+    </div>
+    <div class='card facts'>
+      <div class='fact'><small>Quy mô</small><b>${esc(m.scale)}</b></div>
+      <div class='fact'><small>Thời gian</small><b>${fmt(m.start)} → ${fmt(m.deadline)}/${m.deadline.slice(0, 4)} · ${ds.length} ngày</b></div>
+      <div class='fact'><small>Đội dự án</small><div class='people-mini'>${people.map(p => `<div class='pm-row'>${av(p.name)}<div><b>${esc(p.name)}</b><br><span style='color:#475569;font-size:13px'>${esc(p.role)}</span></div></div>`).join('')}</div></div>
+    </div>
+  </div></section>
+
+  <div class='container page'>
+    <div class='kpis'>
+      <div class='card kpi'><small>Work package</small><b>${n}</b><span>${ph.length} nhóm đầu ra · ${nodes().filter(x => x.type === 'group').length} nhóm công việc</span></div>
+      <div class='card kpi'><small>Hoàn thành</small><b>${r.pct}%</b><span>${r.c.done}/${n} việc</span></div>
+      <div class='card kpi'><small>Kế hoạch đến hôm nay</small><b>${planned}%</b><span>${dueCount} việc đã đến hạn</span></div>
+      <div class='card kpi'><small>Đang thực hiện</small><b>${r.c.doing}</b><span>${r.c.hold} tạm hoãn</span></div>
+      <div class='card kpi ${late.length ? 'warn' : ''}'><small>Quá hạn chưa xong</small><b>${late.length}</b><span>${late.length ? 'cần cập nhật hoặc xử lý' : 'đúng tiến độ'}</span></div>
+      <div class='card kpi'><small>Đến hạn nộp</small><b>${dl > 0 ? dl : 0}</b><span>${dl > 0 ? 'ngày làm việc còn lại' : dl === 0 ? 'hôm nay là hạn nộp' : 'đã quá hạn'}</span></div>
+    </div>
+
+    <div class='grid2'>
+      <div class='card'>
+        <h3>Tiến độ theo nhóm đầu ra</h3><p class='hint'>Các nhóm đầu ra của dự án và nhóm điều phối.</p>
+        ${ph.map(p => { const l = tasksOf(p), x = roll(l); return `<div class='row-s'>
+          <div class='rs-top'><span class='dotc' style='background:${STREAM[p.id] || '#64748B'}'></span><a data-link href='/cong-viec?luong=${p.id}'><b>${esc(p.id + '. ' + p.name)}</b></a><span class='r'>${x.pct}%</span></div>
+          ${stackBar(x)}
+          <div class='rs-sub'><span>${x.c.done}/${x.n} xong</span><span>${x.c.doing} đang làm</span><span>${range(l)}</span></div></div>`; }).join('')}
+        <div class='legend'>${['done','doing','hold','todo'].map(k => `<span><i style='background:${ST[k].c}'></i>${ST[k].l}</span>`).join('')}</div>
+      </div>
+      <div class='card att'>
+        <h3>Cần chú ý</h3><p class='hint'>Việc quá hạn chưa xong hoặc đang tạm hoãn.</p>
+        ${attention.length ? attention.slice(0, 7).map(t => `<a data-link href='${taskUrl(t.id)}'>${av(t.owner, true)}<span class='an'>${esc(t.name)}</span><small>${t.status === 'hold' ? 'Tạm hoãn' : 'Hạn ' + fmt(t.end)}</small></a>`).join('') : `<div class='empty'>Không có việc cần chú ý.</div>`}
+        ${attention.length > 7 ? `<p class='hint' style='margin:10px 0 0'>và ${attention.length - 7} việc khác.</p>` : ''}
+      </div>
+    </div>
+
+    <div class='grid3'>
+      ${people.map(p => { const l = T.filter(t => t.owner === p.name), x = roll(l), nxt = l.filter(t => t.status !== 'done').sort((a, b) => a.end.localeCompare(b.end)).slice(0, 2);
+        return `<div class='card person'>
+        <div class='pt'>${av(p.name)}<div><b>${esc(p.name)}</b><small>${esc(p.role)}</small></div></div>
+        <div class='area'>${esc(p.area)}</div>
+        <div class='nums'><div><b>${x.n}</b>việc</div><div><b>${x.c.done}</b>xong</div><div><b>${x.c.doing}</b>đang làm</div></div>
+        ${stackBar(x)}
+        <div class='next'>${nxt.length ? nxt.map(t => `<a data-link href='${taskUrl(t.id)}'>${esc(t.name)} <span style='color:#94A3B8'>· ${fmt(t.end)}</span></a>`).join('') : 'Không còn việc mở.'}
+          <a data-link href='/cong-viec?nguoi=${encodeURIComponent(p.name)}' style='color:#1F62E8;font-weight:600;margin-top:4px'>Xem tất cả việc →</a></div>
+      </div>`; }).join('')}
+    </div>
+
+    <div class='grid2'>
+      <div class='card'>
+        <h3>Độ phủ theo chủ đề</h3><p class='hint'>Số việc xong / tổng việc của từng chủ đề trong mỗi nhóm.</p>
+        <table class='cov'><thead><tr><th>Chủ đề</th>${main.map(p => `<th>${esc(p.name)}</th>`).join('')}</tr></thead><tbody>
+          ${THEME_KEYS.map(th => `<tr><td>${th} · ${esc(THEMES[th])}</td>${main.map(p => `<td>${cov(th, p.id)}</td>`).join('')}</tr>`).join('')}
+        </tbody></table>
+      </div>
+      <div class='card'>
+        <h3>Khối lượng theo ngày</h3><p class='hint'>Số việc đang chạy mỗi ngày và các mốc kiểm soát.</p>
+        <div class='load'>${ds.map((d, i) => `<div class='lcol'><div class='lbar ${d.iso === today ? 'today' : ''}' style='height:${Math.max(4, load[i] * 100 / maxLoad)}%'><span>${load[i]}</span></div></div>`).join('')}</div>
+        <div class='ldays'>${ds.map(d => `<div class='${d.iso === today ? 'today' : ''} ${d.iso === m.deadline ? 'dl' : ''}'>${d.dow}<br>${d.day}</div>`).join('')}</div>
+        <div class='msl'>${ms.map(x => `<div class='ms ${x.status === 'done' ? 'done' : ''}'><b>${fmt(x.end)}</b>${esc(x.name.replace(/^MỐC[^:]*:[ ]*/, ''))}<br>${statusPill(x.status)}</div>`).join('')}</div>
+      </div>
+    </div>
+  </div>`);
+}
+
+// ---------- TAB 2: CÔNG VIỆC
+function filterBar() {
+  const owners = team();
+  return `<div class='filters'>
+    <select id='fl'><option value=''>Mọi nhóm đầu ra</option>${phases().map(p => `<option value='${p.id}' ${S.f.luong === p.id ? 'selected' : ''}>${esc(p.id + '. ' + p.name)}</option>`).join('')}</select>
+    <select id='fn'><option value=''>Mọi người phụ trách</option>${optList(owners, S.f.nguoi)}</select>
+    <select id='ft'><option value=''>Mọi trạng thái</option>${optList(Object.keys(ST), S.f.tt, k => ST[k].l)}</select>
+    <select id='fc'><option value=''>Mọi chủ đề</option>${optList(THEME_KEYS, S.f.chude, k => k + ' · ' + THEMES[k])}</select>
+    <input id='fq' placeholder='Tìm công việc…' value='${esc(S.f.q)}'>
+    ${filtering() ? `<button class='pbtn sm' id='clearf'>Xóa bộ lọc</button>` : ''}
+    ${S.sub === 'list' ? `<button class='pbtn sm' id='expand'>Mở rộng</button><button class='pbtn sm' id='collapse'>Thu gọn</button>` : ''}
+    <span class='sync' id='sync'></span></div>`;
+}
+
+function taskRow(t, ds) {
+  const e = canEdit();
+  const dots = ds.map(d => `<i style='${d.iso >= t.start && d.iso <= t.end ? 'background:' + ST[t.status].c : ''}'></i>`).join('');
+  return `<tr class='tk ${t.milestone ? 'mile' : ''} ${S.openId === t.id ? 'sel' : ''}' data-open='${esc(t.id)}'>
+    <td><div class='tn'>${esc(t.name)}</div><div class='ts'>${esc(t.scope)}</div></td>
+    <td data-stop>${e ? `<select data-id='${esc(t.id)}' data-f='owner'><option value=''>Chưa gán</option>${optList(team(), t.owner)}</select>` : `<div class='own'>${av(t.owner, true)}${esc(t.owner || '—')}</div>`}</td>
+    <td data-stop>${e ? `<select data-id='${esc(t.id)}' data-f='status' style='background:${ST[t.status].bg};color:${ST[t.status].fg};font-weight:600'>${optList(Object.keys(ST), t.status, k => ST[k].l)}</select>` : statusPill(t.status)}</td>
+    <td><div class='tm'>${fmt(t.start)} → ${fmt(t.end)}</div><div class='dd'>${dots}</div></td>
+    <td class='dl-t'>${esc(t.deliverable)}</td>
+  </tr>`;
+}
+
+function listView() {
+  const ds = dayList(), active = filtering(), rows = [], A = isAdmin();
+  orderedNodes().forEach(n => {
+    if (n.type === 'task') { if (!passF(n) || hiddenByCollapse(n)) return; rows.push(taskRow(n, ds)); return; }
+    const kids = tasksOf(n);
+    if (S.f.luong && phaseId(n.id) !== S.f.luong) return;
+    if (active && !kids.some(passF)) return;
+    if (hiddenByCollapse(n)) return;
+    const x = roll(kids), open = !S.collapsed[n.id], isPhase = n.type === 'phase';
+    const adminBtns = A ? ` <button class='pbtn sm' data-add='${n.id}' data-kind='${isPhase ? 'group' : 'task'}'>${isPhase ? '+ Nhóm công việc' : '+ Việc'}</button> <button class='pbtn sm' data-rename='${n.id}'>Đổi tên</button> <button class='pbtn sm danger' data-del='${n.id}'>Xóa</button>` : '';
+    if (isPhase) {
+      rows.push(`<tr class='ph'><td colspan='5'><div class='phn'><span class='tg' data-toggle='${n.id}'>${open ? '▾' : '▸'}</span><span class='dotc' style='background:${STREAM[n.id] || '#64748B'}'></span><b>${esc(n.id + '. ' + n.name)}</b><span class='mini'><i style='width:${x.pct}%'></i></span><span class='pcount'>${x.c.done}/${x.n} xong · ${range(kids)}</span>${adminBtns}</div></td></tr>`);
+    } else {
+      const dom = {}; kids.forEach(t => { dom[t.solution] = (dom[t.solution] || 0) + 1; });
+      const top = Object.keys(dom).sort((a, b) => dom[b] - dom[a])[0];
+      rows.push(`<tr class='gp'><td colspan='5'><span class='tg' data-toggle='${n.id}'>${open ? '▾' : '▸'}</span>${esc(n.id)} · ${esc(n.name)} ${top ? appTag(top) : ''} <span class='pcount'>${x.c.done}/${x.n} xong</span>${adminBtns}</td></tr>`);
+    }
+  });
+  return `<div class='tbox'><div class='tscroll'><table class='t'><thead><tr><th>Hạng mục và phạm vi</th><th>Phụ trách</th><th>Trạng thái</th><th>Thời gian</th><th>Thành phẩm</th></tr></thead>
+    <tbody>${rows.join('') || `<tr><td colspan='5' class='empty'>Không có việc khớp bộ lọc.</td></tr>`}</tbody></table></div></div>`;
+}
+
+function matrixView() {
+  const list = tasks().filter(passF), cols = phases();
+  const cell = (th, p) => {
+    const items = list.filter(t => t.theme === th && phaseId(t.id) === p);
+    return `<div class='mc'>${items.map(t => `<a class='mi' data-link href='${taskUrl(t.id)}' style='--c:${ST[t.status].c}'><b>${esc(t.name)}</b><small>${fmt(t.start)} → ${fmt(t.end)} · ${ST[t.status].l}${t.owner ? ' · ' + esc(t.owner) : ''}</small></a>`).join('') || `<span class='dl-t'>—</span>`}</div>`;
+  };
+  return `<div class='matrix' style='--n:${cols.length}'><div></div>${cols.map(c => `<div class='mh' style='background:${STREAM[c.id] || '#64748B'}'>${esc(c.name)}</div>`).join('')}
+    ${THEME_KEYS.concat(['0']).map(th => `<div class='mt'>${th === '0' ? esc(THEMES['0']) : th + ' · ' + esc(THEMES[th])}<small>${esc(THEME_DESC[th] || '')}</small></div>${cols.map(c => cell(th, c.id)).join('')}`).join('')}</div>`;
+}
+
+function histView() {
+  const h = S.data.history || [];
+  if (!h.length) return `<div class='tbox hist'><div class='empty'>Chưa có chỉnh sửa nào.</div></div>`;
+  return `<div class='tbox hist'>${h.slice(0, 100).map(x => `<div><small>${new Date(x.t).toLocaleString('vi-VN')} · ${esc(x.by)} (${x.role === 'admin' ? 'quản trị' : 'biên tập'})</small><br>${esc(x.msg)}</div>`).join('')}</div>`;
+}
+
+function tasksPage() {
+  const T = tasks(), r = roll(T);
+  const views = [['list','Danh sách'],['matrix','Theo chủ đề'],['hist','Nhật ký thay đổi']];
+  const body = S.sub === 'matrix' ? matrixView() : S.sub === 'hist' ? histView() : listView();
+  return shell(`
+  <div class='container page'>
+    <div class='ph-head'><div><div class='eyebrow'>Công việc</div><h2>Phạm vi và nội dung từng việc</h2>
+      <p>${T.length} work package · ${r.c.done} đã xong · bấm vào một dòng để xem phạm vi, thành phẩm, tiêu chí hoàn thành và phụ thuộc.</p></div></div>
+    <div class='seg'>${views.map(v => `<button data-sub='${v[0]}' class='${S.sub === v[0] ? 'on' : ''}'>${v[1]}</button>`).join('')}</div>
+    ${(S.sub === 'list' || S.sub === 'matrix') ? filterBar() : `<div class='filters'><span class='sync' id='sync'></span></div>`}
+    ${body}
+  </div>${drawer()}`);
+}
+
+// ---------- ngăn chi tiết một việc
+function depLinks(str) {
+  const ids = String(str || '').split(',').join(' ').split(';').join(' ').split(' ').filter(Boolean);
+  return ids.map(id => nodeById(id)).filter(Boolean);
+}
+function drawer() {
+  const t = S.openId && nodeById(S.openId);
+  if (!t || t.type !== 'task') return '';
+  const e = canEdit(), a = isAdmin();
+  const deps = depLinks(t.dep), blocks = tasks().filter(x => depLinks(x.dep).some(d => d.id === t.id));
+  const depItem = x => `<a data-link href='${taskUrl(x.id)}'>${statusPill(x.status)}<span>${esc(x.id)} · ${esc(x.name)}</span><small>${fmt(x.start)} → ${fmt(x.end)}</small></a>`;
+  const field = (label, f, view, input) => `<div><label>${label}</label>${a || (e && ['status','owner','start','end','priority','note'].includes(f)) ? input : `<div class='ro'>${view}</div>`}</div>`;
+  const text = (f, rows) => a ? `<textarea data-id='${esc(t.id)}' data-f='${f}' rows='${rows || 3}'>${esc(t[f])}</textarea>` : `<p>${esc(t[f]) || '<span class=' + APOS + 'dl-t' + APOS + '>Chưa mô tả</span>'}</p>`;
+  return `<div class='scrim' data-close></div><aside class='drawer'>
+    <div class='dr-head'><button class='pbtn sm x' data-close>Đóng ✕</button>
+      <div style='display:flex;gap:6px;flex-wrap:wrap;align-items:center'><span class='tag' style='background:#F1F5F9;color:#475569'>${esc(t.id)}</span>${appTag(t.solution)}<span class='tag' style='background:#F1F5F9;color:#475569'>${esc(phaseId(t.id) + '. ' + (nodeById(phaseId(t.id)) || {name: ''}).name)}</span>${t.milestone ? `<span class='tag' style='background:#FEF3C7;color:#B45309'>Mốc</span>` : ''}</div>
+      ${a ? `<input data-id='${esc(t.id)}' data-f='name' value='${esc(t.name)}' style='width:100%;margin-top:10px;font-size:18px;font-weight:700;padding:8px 12px;border:1px solid #CBD5E1;border-radius:10px'>` : `<h3>${esc(t.name)}</h3>`}</div>
+    <div class='dr-body'>
+      <div class='dsec'><h5>Phạm vi công việc</h5>${text('scope', 4)}</div>
+      <div class='dsec'><h5>Thành phẩm</h5>${a ? `<input data-id='${esc(t.id)}' data-f='deliverable' value='${esc(t.deliverable)}'>` : `<p>${esc(t.deliverable)}</p>`}</div>
+      <div class='dsec'><h5>Tiêu chí hoàn thành</h5>${text('accept', 3)}</div>
+      <div class='dsec'><h5>Phụ thuộc (cần xong trước hoặc song song)</h5>
+        ${a ? `<input data-id='${esc(t.id)}' data-f='dep' value='${esc(t.dep)}' placeholder='Ví dụ: 2.2.1, 1.1.1' style='margin-bottom:8px'>` : ''}
+        <div class='deps'>${deps.length ? deps.map(depItem).join('') : `<span class='dl-t'>Không phụ thuộc việc nào.</span>`}</div></div>
+      ${blocks.length ? `<div class='dsec'><h5>Các việc phụ thuộc vào việc này</h5><div class='deps'>${blocks.map(depItem).join('')}</div></div>` : ''}
+      <div class='dsec'><h5>Thực hiện</h5><div class='fgrid'>
+        ${field('Người phụ trách', 'owner', esc(t.owner || 'Chưa gán'), `<select data-id='${esc(t.id)}' data-f='owner'><option value=''>Chưa gán</option>${optList(team(), t.owner)}</select>`)}
+        ${field('Trạng thái', 'status', statusPill(t.status), `<select data-id='${esc(t.id)}' data-f='status' style='background:${ST[t.status].bg};color:${ST[t.status].fg};font-weight:600'>${optList(Object.keys(ST), t.status, k => ST[k].l)}</select>`)}
+        ${field('Bắt đầu', 'start', fmtFull(t.start), `<input type='date' data-id='${esc(t.id)}' data-f='start' value='${t.start}'>`)}
+        ${field('Hạn hoàn thành', 'end', fmtFull(t.end), `<input type='date' data-id='${esc(t.id)}' data-f='end' value='${t.end}'>`)}
+        ${field('Ưu tiên', 'priority', esc(t.priority), `<select data-id='${esc(t.id)}' data-f='priority'>${optList(PRIORITY, t.priority)}</select>`)}
+        ${field('Vai trò', 'role', esc(t.role), `<select data-id='${esc(t.id)}' data-f='role'>${optList(ROLES, t.role)}</select>`)}
+        ${field('Ứng dụng', 'solution', esc(t.solution), `<select data-id='${esc(t.id)}' data-f='solution'>${optList(APPS, t.solution)}</select>`)}
+        ${field('Chủ đề', 'theme', esc(THEMES[t.theme] || ''), `<select data-id='${esc(t.id)}' data-f='theme'>${optList(Object.keys(THEMES), t.theme, k => THEMES[k])}</select>`)}
+        ${field('Cột mốc', 'mark', esc(t.mark), `<input data-id='${esc(t.id)}' data-f='mark' value='${esc(t.mark)}'>`)}
+      </div></div>
+      <div class='dsec'><h5>Ghi chú</h5>${e ? `<textarea data-id='${esc(t.id)}' data-f='note' rows='3' placeholder='Ghi chú, vướng mắc, quyết định…'>${esc(t.note)}</textarea>` : `<p>${esc(t.note) || '<span class=' + APOS + 'dl-t' + APOS + '>Không có ghi chú</span>'}</p>`}</div>
+      ${a ? `<div class='dsec'><button class='pbtn danger' data-del='${esc(t.id)}'>Xóa việc này</button></div>` : ''}
+    </div></aside>`;
+}
+
+// ---------- vẽ trang
+function render() {
+  if (!S.data) return;
+  const keep = $('#fq') && document.activeElement === $('#fq');
+  $('#app').innerHTML = S.page === 'cong-viec' ? tasksPage() : overview();
+  document.title = (S.page === 'cong-viec' ? 'Công việc' : 'Tổng quan') + ' · WBS triển khai CRM';
+  setSync();
+  if (keep) { const q = $('#fq'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+}
+
+function loginModal() {
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<form><h3>Đăng nhập chỉnh sửa</h3><div class='dl-t'>Nhập tên để lưu nhật ký thay đổi và mã truy cập do quản trị cấp.</div>
+    <label>Tên của bạn</label><input id='ln' value='${esc(auth.name)}' autocomplete='name' required>
+    <label>Mã truy cập</label><input id='lc' type='password' autocomplete='off' required>
+    <div class='err' id='le'></div>
+    <div class='row'><button type='button' class='pbtn' id='lx'>Hủy</button><button class='pbtn dark'>Đăng nhập</button></div></form>`;
+  document.body.appendChild(m);
+  $('#ln', m).focus();
+  $('#lx', m).onclick = () => m.remove();
+  $('form', m).onsubmit = async ev => {
+    ev.preventDefault();
+    const name = $('#ln', m).value.trim(), code = $('#lc', m).value.trim();
+    const prev = auth; auth = {name, code};
+    try {
+      const j = await api('GET');
+      if (j.role === 'viewer') { auth = prev; $('#le', m).textContent = 'Mã truy cập không đúng.'; return; }
+      persist(); apply(j); m.remove(); render();
+    } catch (e) { auth = prev; $('#le', m).textContent = e.message; }
+  };
+}
+
+// ---------- sự kiện
+document.addEventListener('click', ev => {
+  const el = ev.target;
+  const link = el.closest('a[data-link]');
+  if (link) { ev.preventDefault(); go(link.getAttribute('href')); return; }
+  const b = el.closest('button, .tg');
+  if (b) {
+    const d = b.dataset;
+    if (b.id === 'login') return loginModal();
+    if (b.id === 'logout') { auth.code = ''; persist(); S.role = 'viewer'; return load(); }
+    if (b.id === 'expand') { S.collapsed = {}; persistCollapsed(); return render(); }
+    if (b.id === 'collapse') { nodes().forEach(n => { if (n.type !== 'task') S.collapsed[n.id] = true; }); persistCollapsed(); return render(); }
+    if (b.id === 'clearf') { S.f = {luong:'', nguoi:'', tt:'', chude:'', q:''}; syncUrl(); return render(); }
+    if (d.toggle) { S.collapsed[d.toggle] = !S.collapsed[d.toggle]; persistCollapsed(); return render(); }
+    if (d.sub) { S.sub = d.sub; syncUrl(); return render(); }
+    if (d.close !== undefined) return go('/cong-viec' + queryString());
+    if (d.add) {
+      const n = prompt(d.kind === 'group' ? 'Tên nhóm công việc mới:' : 'Tên việc mới:');
+      if (n) mutate({op: d.kind === 'group' ? 'addGroup' : 'add', parent: d.add, name: n});
+      return;
+    }
+    if (d.rename) { const n = prompt('Tên mới:', (nodeById(d.rename) || {}).name || ''); if (n) mutate({op:'update', id:d.rename, patch:{name:n}}); return; }
+    if (d.del) { if (confirm('Xóa ' + d.del + '?')) { if (S.openId === d.del) { S.openId = null; history.replaceState(null, '', '/cong-viec' + queryString()); } mutate({op:'delete', id:d.del}); } return; }
+    return;
+  }
+  if (el.closest('[data-close]') && el.closest('.scrim')) return go('/cong-viec' + queryString());
+  const row = el.closest('tr[data-open]');
+  if (row && !el.closest('[data-stop]')) go(taskUrl(row.dataset.open));
+});
+document.addEventListener('change', ev => {
+  const el = ev.target, d = el.dataset || {};
+  if (el.id === 'fl') { S.f.luong = el.value; syncUrl(); return render(); }
+  if (el.id === 'fn') { S.f.nguoi = el.value; syncUrl(); return render(); }
+  if (el.id === 'ft') { S.f.tt = el.value; syncUrl(); return render(); }
+  if (el.id === 'fc') { S.f.chude = el.value; syncUrl(); return render(); }
+  if (d.id && d.f) return mutate({op:'update', id:d.id, patch:{[d.f]: el.value}});
+  if (d.meta) return mutate({op:'meta', patch:{[d.meta]: el.value}});
+});
+document.addEventListener('input', ev => {
+  if (ev.target.id === 'fq') { S.f.q = ev.target.value; syncUrl(); render(); }
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && S.openId) go('/cong-viec' + queryString()); });
+window.addEventListener('popstate', () => { readRoute(); render(); });
+setInterval(() => {
+  const a = document.activeElement;
+  if (S.busy || document.hidden || document.querySelector('.modal')) return;
+  if (a && (a.tagName === 'INPUT' || a.tagName === 'SELECT' || a.tagName === 'TEXTAREA')) return;
+  load(true);
+}, 90000);
+readRoute();
+load();
+</script>
+</body>
+</html>
