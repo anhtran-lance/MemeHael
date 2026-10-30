@@ -1,11 +1,12 @@
-const { put, list, del } = require('@vercel/blob');
 const crypto = require('crypto');
 const seed = require('../lib/seed');
+const initial = require('../lib/snapshot.json');
 
-// Mỗi lần lưu ghi một file mới theo số phiên bản (không bị CDN giữ cache bản cũ);
-// đọc luôn lấy file có số phiên bản lớn nhất, giữ lại 5 bản gần nhất làm bản sao lưu.
-const PREFIX = 'crm-wbs/v3-state-';
-const KEEP = 5;
+// Dữ liệu lưu thành một file JSON trong repo GitHub (mỗi lần sửa là một commit nên có sẵn lịch sử và bản sao lưu).
+const TOKEN = process.env.GH_TOKEN;
+const REPO = process.env.GH_REPO || 'trananhhoai0-lang/MemeHael';
+const BRANCH = process.env.GH_BRANCH || 'wbs-data';
+const FILE = 'crm-wbs/state.json';
 
 const ENUM = {
   status: ['todo', 'doing', 'done', 'hold'],
@@ -44,37 +45,49 @@ function roleOf(req) {
 
 const clean = (v, n) => String(v == null ? '' : v).split('').filter((c) => c.charCodeAt(0) >= 32).join('').slice(0, n);
 
-// Bộ nhớ đệm ngắn trong hàm để giảm số lần gọi Blob (mỗi lần đọc tốn một thao tác list).
-let cache = { t: 0, state: null };
+// Bộ nhớ đệm ngắn trong hàm để giảm số lần gọi GitHub; sha dùng để chống ghi đè khi hai người sửa cùng lúc.
+let cache = { t: 0, state: null, sha: '' };
 const clone = (x) => JSON.parse(JSON.stringify(x));
 
-async function save(state) {
-  await put(PREFIX + String(state.rev).padStart(8, '0') + '.json', JSON.stringify(state), {
-    access: 'public',
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType: 'application/json',
+function gh(method, body) {
+  if (!TOKEN) throw new Error('Chưa cấu hình GH_TOKEN');
+  return fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE + (method === 'GET' ? '?ref=' + BRANCH : ''), {
+    method,
+    headers: { Authorization: 'Bearer ' + TOKEN, Accept: 'application/vnd.github+json', 'User-Agent': 'crm-wbs', 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
   });
-  const { blobs } = await list({ prefix: PREFIX });
-  const stale = blobs.sort((a, b) => b.pathname.localeCompare(a.pathname)).slice(KEEP).map((b) => b.url);
-  if (stale.length) await del(stale).catch(() => {});
-  cache = { t: Date.now(), state: clone(state) };
+}
+
+async function save(state) {
+  const msg = 'WBS rev ' + state.rev + ': ' + ((state.history && state.history[0] && state.history[0].msg) || 'cap nhat');
+  const r = await gh('PUT', {
+    message: msg.slice(0, 200),
+    content: Buffer.from(JSON.stringify(state)).toString('base64'),
+    branch: BRANCH,
+    sha: cache.sha || undefined,
+  });
+  if (r.status === 409 || r.status === 422) { cache = { t: 0, state: null, sha: '' }; throw new Reject(409, 'Có người vừa chỉnh sửa, hãy tải lại trang rồi thử lại'); }
+  if (!r.ok) throw new Error('Không ghi được dữ liệu (' + r.status + ')');
+  const j = await r.json();
+  cache = { t: Date.now(), state: clone(state), sha: j.content.sha };
 }
 
 async function load(fresh) {
   if (!fresh && cache.state && Date.now() - cache.t < 8000) return clone(cache.state);
-  const { blobs } = await list({ prefix: PREFIX });
-  let state;
-  if (!blobs.length) {
-    state = seed();
+  const r = await gh('GET');
+  let state, sha = '';
+  if (r.status === 404) {
+    state = clone(initial);
+    cache = { t: 0, state: null, sha: '' };
     await save(state);
-  } else {
-    const latest = blobs.sort((x, y) => y.pathname.localeCompare(x.pathname))[0];
-    const r = await fetch(latest.url, { cache: 'no-store' });
-    if (!r.ok) throw new Error('Không đọc được dữ liệu (' + r.status + ')');
-    state = await r.json();
+    return state;
   }
-  cache = { t: Date.now(), state: clone(state) };
+  if (!r.ok) throw new Error('Không đọc được dữ liệu (' + r.status + ')');
+  const j = await r.json();
+  state = JSON.parse(Buffer.from(j.content, 'base64').toString('utf8'));
+  sha = j.sha;
+  cache = { t: Date.now(), state: clone(state), sha };
   return state;
 }
 
